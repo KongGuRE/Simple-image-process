@@ -1,5 +1,7 @@
 from datetime import time
 
+from tqdm import tqdm
+
 import Img_Data_Process as IDP
 from PIL import Image
 import os
@@ -35,8 +37,6 @@ def one_by_one_data_del(root_dir, data_path, _rz_size):
                             print("\033[31m", "File file delete", file_name)
                             file_rm_data_number = file_rm_data_number + 1
                             file_rm_data_name.append(file_name)
-    print()
-    print()
 
 
 def all_data_del(_Data_Path_List_1, _img_file_name_list_A, _rz_size):
@@ -46,7 +46,7 @@ def all_data_del(_Data_Path_List_1, _img_file_name_list_A, _rz_size):
 
     rm_file = []
 
-    for File_idx, imgFile in enumerate(_Data_Path_List_1):
+    for File_idx, imgFile in enumerate(tqdm(_Data_Path_List_1)):
         image1 = Image.open(imgFile)
         imag1_size = image1.size
         if imag1_size[0] == _rz_size:
@@ -73,27 +73,27 @@ def all_data_del(_Data_Path_List_1, _img_file_name_list_A, _rz_size):
     print("삭제되지 않은 파일이 있을 경우 프로그램을 한번더 실행해 주세요")
 
 # Press the green button in the gutter to run the script.
+
+
 if __name__ == '__main__':
 
-
     # 데이터 경로 설정 -- User setting
-    root_path: str = r"C:\DataSET\ImageData\확인"
-    data_1_path: str = r"test"
-    rz_size = 96
+    root_path: str = r"C:\DataSET\ImageData\P-TCP\P-TCP\Train"
+    data_1_path: str = r"OK"
 
+    # 정상 이미지 사이즈 입력
+    rz_size = 256
 
-    # # 하나씩 삭제 -- 삭제가 잘 안됨
-    one_by_one_data_del(root_path, data_1_path, rz_size)
+    # 하나씩 삭제 -- 삭제가 잘 안됨
+    # one_by_one_data_del(root_path, data_1_path, rz_size)
     # 한번에 삭제
-    # all_data_del(root_path, data_1_path, rz_size)
-
-
+    all_data_del(root_path, data_1_path, rz_size)
 
     # 데이터 읽어오기
 
-
     # cv2.imread 가 데이터를 읽어오지 못하는 문제가 있음.
     # 따라서 본 코드는 from PIL import Image 의 Image.open 을 이용하여 데이터를 불러와서 사용
+
 
 """    
 반복실행 후에도 삭제되지 않는 파일은 windows 상에서 이미 지워진 파일이거나 
