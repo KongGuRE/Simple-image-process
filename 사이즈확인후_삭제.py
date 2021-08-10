@@ -78,11 +78,11 @@ def all_data_del(_Data_Path_List_1, _img_file_name_list_A, _rz_size):
 if __name__ == '__main__':
 
     # 데이터 경로 설정 -- User setting
-    root_path: str = r"C:\DataSET\ImageData\P-TCP\P-TCP\Train"
-    data_1_path: str = r"OK"
+    root_path: str = r"C:\DataSET\ImageData\P-TCP\Original Data\210726\front-top 1\2021-07-18\PPM6V07BA"
+    data_1_path: str = r"output_Python"
 
     # 정상 이미지 사이즈 입력
-    rz_size = 256
+    rz_size = 512
 
     # 하나씩 삭제 -- 삭제가 잘 안됨
     # one_by_one_data_del(root_path, data_1_path, rz_size)
