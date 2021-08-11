@@ -36,7 +36,7 @@ def main():
     file_name = "0001.jpg"
     form_1 = '1'
 
-    path = r'C:\DataSET\ImageData\P-TCP\Original Data\210726\front-top 1\2021-07-18\PPM71G8AA'
+    path = r'C:\DataSET\ImageData\P-TCP\Original Data\210726\front-bot\2021-07-12\PPM6S31AB'
     print(len(os.listdir(path)))
     img_files = glob.glob(path + '/*.jpg')
     print(len(img_files))
@@ -57,7 +57,7 @@ def main():
             if a == 1:
                 cv2.namedWindow(form_1, flags=cv2.WINDOW_NORMAL)
                 # 스크린 있는 화면 조절 전체화면
-                cv2.resizeWindow(winname=form_1, width=1920, height=1080)
+                # cv2.resizeWindow(winname=form_1, width=1920, height=1080)
                 # 스크린 없는 전체화면
                 # cv2.setWindowProperty(form_1, cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
                 cv2.setMouseCallback(form_1, mouse_callback)

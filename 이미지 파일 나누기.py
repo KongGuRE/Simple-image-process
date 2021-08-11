@@ -38,7 +38,46 @@ def Dj_aaa():
     print(np.array_equal(color_1[0:100, 0, 0], color_2[0:100, 0, 0]))
 
     # print((color_1 == color_2))
+def case_0(_co, _dj_c, _path):
+    # print(len(os.listdir(path)))
+    _img_files = glob.glob(_path + '/*.jpg')
+    # print(len(img_files))
+    print(_co)
 
+    createFolder_path = os.path.join(_path, 'output_Python')
+    try:
+        if _dj_c == 1:
+
+            _img_files = [_img_files[_dj_c * _co - _dj_c]]
+            # print(_img_files)
+        elif _dj_c > 1:
+            _img_files = _img_files[_dj_c * _co - _dj_c: _dj_c * _co]
+            # for _ck_file in _img_files:
+            #     print("process-", _co, "  file name: ", _ck_file)
+    except:
+        print('\033[31m' + str(_co) + 'exit()' + '\033[0m')
+        return 0
+
+    try:
+        for file_name in _img_files:
+            # image read
+            color = cv2.imread(file_name, cv2.IMREAD_COLOR)
+
+            data_name = os.path.basename(file_name).rstrip('.jpg')
+            # print(os.path.basename(file_name).rstrip('.jpg')) # RawImage_1480
+            # print(color.shape) # (13800, 7300, 3)
+            print(data_name)
+
+            for count in range(11):
+                _ys = 1000
+                save_file = color[0 + _ys * count: 2000 + _ys * count, 1200:6100, :]
+                # print(save_file.shape)
+
+                name = os.path.join(createFolder_path, data_name + "_" + str(count) + ".jpg")
+                cv2.imwrite(name, save_file)
+    except:
+        print('\033[31m' + str(_co) + 'exit()' + '\033[0m')
+        return 0
 
 def case_1(_co, _dj_c, _path):
     # print(len(os.listdir(path)))
@@ -70,7 +109,7 @@ def case_1(_co, _dj_c, _path):
             # print(color.shape) # (13800, 7300, 3)
             print(data_name)
 
-            for count in range(8):
+            for count in range(9):
                 _ys = 1515
                 save_file = color[0 + _ys * count: 3030 + _ys * count, 0:7022, :]
                 # print(save_file.shape)
@@ -170,12 +209,13 @@ def case_3(_co, _dj_c, _path):
         return 0
 
 def main(_co, _dj_c, _path):
+    case_0(_co, _dj_c, _path)
     # case_1(_co, _dj_c, _path)
     # case_2(_co, _dj_c, _path)
-    case_3(_co, _dj_c, _path)
+    # case_3(_co, _dj_c, _path)
 
 if __name__ == "__main__":
-    path = r'C:\DataSET\ImageData\P-TCP\Original Data\210726\front-top 1\2021-07-19\PPM6T24AA\New folder'
+    path = r'C:\DataSET\ImageData\P-TCP\Original Data\210726\front-bot\2021-07-12\PPM6S31AB\new'
     # print(len(os.listdir(path)))
 
     createFolder_path = os.path.join(path, 'output_Python')
