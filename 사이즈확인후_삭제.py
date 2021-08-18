@@ -65,12 +65,17 @@ def all_data_del(_Data_Path_List_1, _img_file_name_list_A, _rz_size):
             print(a)
             os.unlink(str(a))
         except:
-            print("\033[31m", "File file delete", a)
-            file_rm_data_number = file_rm_data_number + 1
-            file_rm_data_name.append(a)
+            try:
+                print(a)
+                os.unlink(str(a))
+            except:
+                print("\033[31m", "File file delete", a)
+                file_rm_data_number = file_rm_data_number + 1
+                file_rm_data_name.append(a)
+                return file_rm_data_name
 
-    print("삭제되지 않은 이미지 파일 갯수: ", file_rm_data_number)
-    print("삭제되지 않은 파일이 있을 경우 프로그램을 한번더 실행해 주세요")
+    # print("삭제되지 않은 이미지 파일 갯수: ", file_rm_data_number)
+    # print("삭제되지 않은 파일이 있을 경우 프로그램을 한번더 실행해 주세요")
 
 # Press the green button in the gutter to run the script.
 
@@ -78,16 +83,26 @@ def all_data_del(_Data_Path_List_1, _img_file_name_list_A, _rz_size):
 if __name__ == '__main__':
 
     # 데이터 경로 설정 -- User setting
-    root_path: str = r"C:\DataSET\ImageData\P-TCP\Original Data\210726\front-top 1\2021-07-18\PPM6V07BA"
-    data_1_path: str = r"output_Python"
+    root_path: str = r"C:\DataSET\ImageData\Center Top 성능 테스트"
+    data_1_path: str = r"OK"
 
     # 정상 이미지 사이즈 입력
-    rz_size = 512
+    rz_size = 0
 
     # 하나씩 삭제 -- 삭제가 잘 안됨
     # one_by_one_data_del(root_path, data_1_path, rz_size)
     # 한번에 삭제
-    all_data_del(root_path, data_1_path, rz_size)
+    file_rm_data_name = all_data_del(root_path, data_1_path, rz_size)
+    if type(file_rm_data_name) == list:
+        if len(file_rm_data_name) > 0:
+            try:
+                for a in file_rm_data_name:
+                    os.unlink(a)
+                print("File file delete successfully")
+            except:
+                print("Delete file")
+    else:
+        None
 
     # 데이터 읽어오기
 

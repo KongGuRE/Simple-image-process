@@ -1,12 +1,6 @@
 import glob
-
-import Img_Data_Process as IDP
-from PIL import Image
 import os
 import cv2  # OpenCV import
-import numpy as np
-import shutil
-
 
 # 마우스 이벤트 콜백함수 정의
 def mouse_callback(event, x, y, flags, param):

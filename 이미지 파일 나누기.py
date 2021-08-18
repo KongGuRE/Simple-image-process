@@ -8,6 +8,7 @@ import numpy as np
 import shutil
 from threading import Thread
 from multiprocessing import Process, Queue
+import datetime
 
 
 def createFolder(directory):
@@ -17,7 +18,6 @@ def createFolder(directory):
     except OSError:
         print('Error: Creating directory. ' + directory)
         exit(1)
-
 
 def Dj_aaa():
     root = r"C:\Users\USER\Desktop\2021-07-16\PPM6RH0AA"
@@ -38,6 +38,7 @@ def Dj_aaa():
     print(np.array_equal(color_1[0:100, 0, 0], color_2[0:100, 0, 0]))
 
     # print((color_1 == color_2))
+
 def case_0(_co, _dj_c, _path):
     # print(len(os.listdir(path)))
     _img_files = glob.glob(_path + '/*.jpg')
@@ -109,7 +110,7 @@ def case_1(_co, _dj_c, _path):
             # print(color.shape) # (13800, 7300, 3)
             print(data_name)
 
-            for count in range(9):
+            for count in range(11):
                 _ys = 1515
                 save_file = color[0 + _ys * count: 3030 + _ys * count, 0:7022, :]
                 # print(save_file.shape)
@@ -152,7 +153,7 @@ def case_2(_co, _dj_c, _path):
             # print(color.shape) # (13800, 7300, 3)
             print(data_name)
 
-            for count in range(8):
+            for count in range(9):
                 _ys = 2500
                 save_file = color[_ys * count: 5000 + _ys * count, 0:7022, :]
                 # print(save_file.shape)
@@ -195,7 +196,7 @@ def case_3(_co, _dj_c, _path):
             # print(color.shape) # (13800, 7300, 3)
             print(data_name)
 
-            for count in range(9):
+            for count in range(11):
                 _ys = 3000
                 _top_off_set = 0
                 _bottom_off_set = 0
@@ -214,15 +215,16 @@ def main(_co, _dj_c, _path):
     # case_2(_co, _dj_c, _path)
     # case_3(_co, _dj_c, _path)
 
+
 if __name__ == "__main__":
-    path = r'C:\DataSET\ImageData\P-TCP\Original Data\210726\front-bot\2021-07-12\PPM6S31AB\new'
+    path = r'C:\DataSET\ImageData\P-TCP\Original Data\210726\rear-bot\2021-07-29\PPM7J26AA'
     # print(len(os.listdir(path)))
 
     createFolder_path = os.path.join(path, 'output_Python')
     createFolder(createFolder_path)
 
-    dj_c = 1
-
+    dj_c = 3
+    # make process
     th1 = Process(target=main, args=(1, dj_c, path))
     th2 = Process(target=main, args=(2, dj_c, path))
     th3 = Process(target=main, args=(3, dj_c, path))
@@ -244,7 +246,7 @@ if __name__ == "__main__":
     th19 = Process(target=main, args=(19, dj_c, path))
     th20 = Process(target=main, args=(20, dj_c, path))
     th21 = Process(target=main, args=(21, dj_c, path))
-
+    # process run
     th1.start()
     th2.start()
     th3.start()
@@ -266,7 +268,7 @@ if __name__ == "__main__":
     th19.start()
     th20.start()
     th21.start()
-
+    # process join
     th1.join()
     th2.join()
     th3.join()
