@@ -37,9 +37,10 @@ def one_by_one_data_del(root_dir, data_path, _rz_size):
                             print("\033[31m", "File file delete", file_name)
                             file_rm_data_number = file_rm_data_number + 1
                             file_rm_data_name.append(file_name)
+    return file_rm_data_name
 
 
-def all_data_del(_Data_Path_List_1, _img_file_name_list_A, _rz_size):
+def all_data_del(_Data_Path_List_1, _img_file_name_list_A, _rz_size_x, _rz_size_y):
 
     IP_1 = IDP.Img_Data_Loader()
     _Data_Path_List_1, img_file_name_list_A = IP_1.Load_Img_Path(root_path, data_1_path, ck=True)
@@ -49,8 +50,8 @@ def all_data_del(_Data_Path_List_1, _img_file_name_list_A, _rz_size):
     for File_idx, imgFile in enumerate(tqdm(_Data_Path_List_1)):
         image1 = Image.open(imgFile)
         imag1_size = image1.size
-        if imag1_size[0] == _rz_size:
-            if imag1_size[1] == _rz_size:
+        if imag1_size[0] == _rz_size_x:
+            if imag1_size[1] == _rz_size_y:
                 None
             else:
                 rm_file.append(imgFile)
@@ -60,13 +61,13 @@ def all_data_del(_Data_Path_List_1, _img_file_name_list_A, _rz_size):
 
     file_rm_data_number: int = 0
     file_rm_data_name: list = []
-    for a in rm_file:
+    for a in tqdm(rm_file):
         try:
-            print(a)
+            # print(a)
             os.unlink(str(a))
         except:
             try:
-                print(a)
+                # print(a)
                 os.unlink(str(a))
             except:
                 print("\033[31m", "File file delete", a)
@@ -83,16 +84,17 @@ def all_data_del(_Data_Path_List_1, _img_file_name_list_A, _rz_size):
 if __name__ == '__main__':
 
     # 데이터 경로 설정 -- User setting
-    root_path: str = r"C:\DataSET\ImageData\Center Top 성능 테스트"
-    data_1_path: str = r"OK"
+    root_path: str = r"C:\DataSET\P-TCP\Crop Data\center-top1\a"
+    data_1_path: str = r"12"
 
     # 정상 이미지 사이즈 입력
-    rz_size = 0
+    rz_size_x = 256
+    rz_size_y = 256
 
     # 하나씩 삭제 -- 삭제가 잘 안됨
     # one_by_one_data_del(root_path, data_1_path, rz_size)
-    # 한번에 삭제
-    file_rm_data_name = all_data_del(root_path, data_1_path, rz_size)
+    # 한번에 삭
+    file_rm_data_name = all_data_del(root_path, data_1_path, rz_size_x, rz_size_y)
     if type(file_rm_data_name) == list:
         if len(file_rm_data_name) > 0:
             try:

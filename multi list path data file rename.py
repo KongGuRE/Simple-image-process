@@ -3,76 +3,53 @@ import glob
 import math
 from multiprocessing import Process
 import datetime
+import os
 
 
-def file_copy2(_path, _dst):
-    shutil.copy2(_path, _dst)
-
-
-def directory_copy(_src, _dst):
-    shutil.copytree(_src, _dst)
-
-
-def file_copy_list_path(_task_number, _number_of_task, _path, _dst):
+def createFolder(directory):
     try:
-        for file_name in _path:
-            shutil.copy2(file_name, _dst)
-    except:
-        print('\033[31m' + str(_task_number) + 'exit()' + '\033[0m')
-        return 0
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+    except OSError:
+        print('Error: Creating directory. ' + directory)
+        exit(1)
 
 
-def path_type_detector(_number_of_Process, _path_data):
-    if type(_path_data) == list:
-        _jpg_files = []
+def file_rename_list_path(_task_number, _number_of_task, _path, _output_folder_dir):
+    file_name_add = int((_task_number-1) * _number_of_task)
 
-        for _path in _path_data:
-            _jpg_files = _jpg_files + glob.glob(_path + '/*.jpg')
+    for number, file_name in enumerate(_path):
+        dir_name = os.path.dirname(file_name)
+        os.rename(file_name, os.path.join(dir_name, _output_folder_dir, str(file_name_add+number) + '.jpg'))
 
-        _number_of_data = len(_jpg_files)
-        print(_number_of_data)
-
-        _number_of_Process = 25
-
-        print(math.ceil(_number_of_data / _number_of_Process))
-        _number_of_task = math.ceil(_number_of_data / _number_of_Process)
-
-        _jpg_files_list = []
-        for task_number in range(1, _number_of_Process + 1):
-            if number_of_task == 1:
-                _jpg_files_list.append([_jpg_files[number_of_task * task_number - number_of_task]])
-
-            elif number_of_task > 1:
-                _jpg_files_list.append(
-                    _jpg_files[number_of_task * task_number - number_of_task: number_of_task * task_number])
+    # print('\033[31m' + str(_task_number) + 'exit()' + '\033[0m')
+    return 0
 
 
-def main(_task_number, _number_of_task, _path, _dst):
+def main(_task_number, _number_of_task, _path, _output_folder_dir):
     print("Start Process: ", _task_number)
-    file_copy_list_path(_task_number, _number_of_task, _path, _dst)
+    file_rename_list_path(_task_number, _number_of_task, _path, _output_folder_dir)
 
 
 if __name__ == '__main__':
-    import os
+
+    create_output_folder_name = 'output_python'
 
     # 데이터 경로 설정 -- User setting
     start = datetime.datetime.now()
 
-    path_list = [r"C:\DataSET\P-TCP\Crop Data\center-top1\a\1\output",
-                 r"C:\DataSET\P-TCP\Crop Data\center-top1\a\2\output",
-                 r"C:\DataSET\P-TCP\Crop Data\center-top1\a\3\output",
-                 r"C:\DataSET\P-TCP\Crop Data\center-top1\a\4\output",
-                 r"C:\DataSET\P-TCP\Crop Data\center-top1\a\5\output",
-                 r"C:\DataSET\P-TCP\Crop Data\center-top1\a\6\output",
-                 r"C:\DataSET\P-TCP\Crop Data\center-top1\a\7\output",
-                 r"C:\DataSET\P-TCP\Crop Data\center-top1\a\8\output",
-                 r"C:\DataSET\P-TCP\Crop Data\center-top1\a\9\output",
-                 r"C:\DataSET\P-TCP\Crop Data\center-top1\a\11\output",
-                 r"C:\DataSET\P-TCP\Crop Data\center-top1\a\12\output",
+    path_list = [r"C:\DataSET\P-TCP\Crop Data\center-top1\a\1",
+                 r"C:\DataSET\P-TCP\Crop Data\center-top1\a\2",
+                 r"C:\DataSET\P-TCP\Crop Data\center-top1\a\3",
+                 r"C:\DataSET\P-TCP\Crop Data\center-top1\a\4",
+                 r"C:\DataSET\P-TCP\Crop Data\center-top1\a\5",
+                 r"C:\DataSET\P-TCP\Crop Data\center-top1\a\6",
+                 r"C:\DataSET\P-TCP\Crop Data\center-top1\a\7",
+                 r"C:\DataSET\P-TCP\Crop Data\center-top1\a\8",
+                 r"C:\DataSET\P-TCP\Crop Data\center-top1\a\9",
+                 r"C:\DataSET\P-TCP\Crop Data\center-top1\a\11",
+                 r"C:\DataSET\P-TCP\Crop Data\center-top1\a\12",
                  ]
-
-    dst: str = r"C:\DataSET\P-TCP\Crop Data\center-top1\ok"
-
     jpg_files = []
 
     for path in path_list:
@@ -95,6 +72,7 @@ if __name__ == '__main__':
             jpg_files_list.append(
                 jpg_files[number_of_task * task_number - number_of_task: number_of_task * task_number])
 
+    dst = create_output_folder_name
     th1 = Process(target=main, args=(1, number_of_task, jpg_files_list[0], dst))
     th2 = Process(target=main, args=(2, number_of_task, jpg_files_list[1], dst))
     th3 = Process(target=main, args=(3, number_of_task, jpg_files_list[2], dst))

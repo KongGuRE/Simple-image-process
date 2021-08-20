@@ -30,7 +30,7 @@ def main():
     file_name = "0001.jpg"
     form_1 = '1'
 
-    path = r'C:\DataSET\ImageData\P-TCP\Original Data\210726\front-bot\2021-07-12\PPM6S31AB'
+    path = r'C:\DataSET\P-TCP\Original Data\210726\center-top1\PPM7G37AA'
     print(len(os.listdir(path)))
     img_files = glob.glob(path + '/*.jpg')
     print(len(img_files))
