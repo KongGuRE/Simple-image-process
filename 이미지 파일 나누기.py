@@ -286,7 +286,7 @@ def case_center_top_A_0_2(_co, _dj_c, _path):
 
 
 def main(_co, _dj_c, _path):
-    # case_0(_co, _dj_c, _path)
+    case_0(_co, _dj_c, _path)
     # case_1(_co, _dj_c, _path)
     # case_2(_co, _dj_c, _path)
     # case_3(_co, _dj_c, _path)
@@ -302,11 +302,11 @@ def main(_co, _dj_c, _path):
     # case_rear_top_A_0_2(_co, _dj_c, _path)
     # case_front_bot_A_0_1(_co, _dj_c, _path)
     # case_center_top_A_0_1(_co, _dj_c, _path)
-    case_center_top_A_0_2(_co, _dj_c, _path)
+    # case_center_top_A_0_2(_co, _dj_c, _path)
 
 
 if __name__ == "__main__":
-    path = r'C:\DataSET\P-TCP\Original Data\210726\center-top1\PPM7L11AA'
+    path = r'C:\DataSET\P-TCP\Original Data\210826\REAR-TOP\2021-08-25\PPM7V46AA\NG'
     # print(len(os.listdir(path)))
 
     createFolder_path = os.path.join(path, 'output_Python')

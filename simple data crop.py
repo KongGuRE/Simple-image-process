@@ -16,7 +16,7 @@ if __name__ == '__main__':
 
     new_width = 256
     new_height = 256
-    _path = r'C:\DataSET\ImageData\Center Top 성능 테스트\CenterTop2\PPM7V39AA\Crop_Result'
+    _path = r'C:\DataSET\P-TCP\Crop Data\front-top 1\OK\새 폴더'
 
     createFolder_path = os.path.join(_path, 'output_Python')
     createFolder(createFolder_path)

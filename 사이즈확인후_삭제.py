@@ -40,10 +40,10 @@ def one_by_one_data_del(root_dir, data_path, _rz_size):
     return file_rm_data_name
 
 
-def all_data_del(_Data_Path_List_1, _img_file_name_list_A, _rz_size_x, _rz_size_y):
+def all_data_del(_root_dir, _data_path, _rz_size_x, _rz_size_y):
 
     IP_1 = IDP.Img_Data_Loader()
-    _Data_Path_List_1, img_file_name_list_A = IP_1.Load_Img_Path(root_path, data_1_path, ck=True)
+    _Data_Path_List_1, _img_file_name_list_A = IP_1.Load_Img_Path(_root_dir, _data_path, ck=True)
 
     rm_file = []
 
@@ -80,12 +80,28 @@ def all_data_del(_Data_Path_List_1, _img_file_name_list_A, _rz_size_x, _rz_size_
 
 # Press the green button in the gutter to run the script.
 
+def del_ex(_file_rm_data_name):
+    if type(_file_rm_data_name) == list:
+        if len(_file_rm_data_name) > 0:
+            try:
+                for a in _file_rm_data_name:
+                    os.unlink(a)
+                print("File file delete successfully")
+            except:
+                print("Delete file")
+    else:
+        None
+
 
 if __name__ == '__main__':
 
     # 데이터 경로 설정 -- User setting
-    root_path: str = r"C:\DataSET\P-TCP\Crop Data\center-top1\a"
-    data_1_path: str = r"12"
+    root_path: str = r"C:\DataSET\P-TCP\Crop Data\center-top1"
+    data_1_path: str = r"OK"
+    data_2_path: str = r"NG"
+    # data_3_path: str = r"Test\OK"
+    # data_4_path: str = r"Test\NG"
+
 
     # 정상 이미지 사이즈 입력
     rz_size_x = 256
@@ -95,16 +111,16 @@ if __name__ == '__main__':
     # one_by_one_data_del(root_path, data_1_path, rz_size)
     # 한번에 삭
     file_rm_data_name = all_data_del(root_path, data_1_path, rz_size_x, rz_size_y)
-    if type(file_rm_data_name) == list:
-        if len(file_rm_data_name) > 0:
-            try:
-                for a in file_rm_data_name:
-                    os.unlink(a)
-                print("File file delete successfully")
-            except:
-                print("Delete file")
-    else:
-        None
+    del_ex(file_rm_data_name)
+
+    file_rm_data_name = all_data_del(root_path, data_2_path, rz_size_x, rz_size_y)
+    del_ex(file_rm_data_name)
+
+    # file_rm_data_name = all_data_del(root_path, data_3_path, rz_size_x, rz_size_y)
+    # del_ex(file_rm_data_name)
+    #
+    # file_rm_data_name = all_data_del(root_path, data_4_path, rz_size_x, rz_size_y)
+    # del_ex(file_rm_data_name)
 
     # 데이터 읽어오기
 

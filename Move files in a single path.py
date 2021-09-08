@@ -83,9 +83,9 @@ if __name__ == '__main__':
     # 데이터 경로 설정 -- User setting
     start = datetime.datetime.now()
 
-    path = r"C:\DataSET\P-TCP\Crop Data\center-top1\a\12"
+    path = r"C:\20210818\rear-top\Test\OK"
 
-    dst: str = r"C:\DataSET\P-TCP\Crop Data\center-top1\12"
+    dst: str = r"E:\CDJ\P-TCP\train data set\rear-top\Test\OK"
 
     img_files = glob.glob(path + '/*.jpg')
 
