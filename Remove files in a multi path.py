@@ -178,6 +178,9 @@ if __name__ == '__main__':
     start = datetime.datetime.now()
 
     data_list = [
+        search_directory(r"C:\DataSET\P-TCP", ".jpg", True),
+        search_directory(r"C:\DataSET\P-TCP", ".jpg", True),
+        search_directory(r"C:\DataSET\P-TCP", ".jpg", True),
         search_directory(r"C:\DataSET\P-TCP", ".jpg", True)
         ]
 

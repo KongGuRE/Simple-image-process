@@ -48,6 +48,8 @@ def search_directory(_directory: str, _file_ext: str = "*", _all_sub_folders: bo
                     if _ext == _file_ext:
                         _task_path_list.append(os.path.join(_path, filename))
                         # print("%s" % (os.path.join(_path, filename)))
+                    elif _file_ext == "*":
+                        _task_path_list.append(os.path.join(_path, filename))
         except PermissionError:
             pass
     else:
@@ -107,6 +109,7 @@ def check_img_size(_file_path_list: list, _rz_size_x: int, _rz_size_y: int) -> L
         try:
             img_file = cv2.imread(_imgFile)
             img_size = img_file.shape
+
             if img_size[1] == _rz_size_x:
                 if img_size[0] == _rz_size_y:
                     pass
@@ -125,9 +128,12 @@ def check_img_size(_file_path_list: list, _rz_size_x: int, _rz_size_y: int) -> L
                         return_data_list.append(_imgFile)
                 else:
                     return_data_list.append(_imgFile)
-            except OSError as err:
-                print("\033[38;5;9mFailed reading File {} \033[0m".format(_imgFile))
-                print(err)
+            except:
+                try:
+                    return_data_list.append(_imgFile)
+                    print("\033[38;5;9mFailed reading File {} \033[0m".format(_imgFile))
+                except:
+                    pass
 
     return return_data_list
 
@@ -145,11 +151,11 @@ def del_ex(_file_rm_data_name: list) -> List[str]:
         if len(_file_rm_data_name) > 0:
             for _rm_file in _file_rm_data_name:
                 try:
-                    print("Delete files: \033[38;5;14m {} \033[0m".format(_rm_file))
+                    # print("Delete files: \033[38;5;14m {} \033[0m".format(_rm_file))
                     os.unlink(_rm_file)
                 except OSError as err:
                     failed_file_list.append(_rm_file)
-                    print("\033[38;5;9m Failed to delete file : {} \033[0m".format(_rm_file))
+                    # print("\033[38;5;9m Failed to delete file : {} \033[0m".format(_rm_file))
                     # print(err)
     else:
         pass
@@ -159,13 +165,19 @@ def del_ex(_file_rm_data_name: list) -> List[str]:
 
 def check_img_size_and_remove(_file_path_list: list, _rz_size_x: int, _rz_size_y: int) -> List[str]:
     _rm_data_list = check_img_size(_file_path_list, _rz_size_x, _rz_size_y)
-    # _failed_file_list = del_ex(_rm_data_list)
-    return _rm_data_list
+    _failed_file_list = del_ex(_rm_data_list)
+    return _failed_file_list
 
 
-def main(_task_number, _file_path_list, _rz_size_x, _rz_size_y, _return_dict):
+def main(_task_number: int, _file_path_list: list, _rz_size_x: int, _rz_size_y: int, _return_dict: dict):
     print("Start Process: \033[38;5;14m {} \033[0m".format(_task_number))
     start = datetime.datetime.now()
+
+    # print("{} -> data: {}, type: {}".format("_task_number", _task_number, type(_task_number)))
+    # print("{} -> data: {}, type: {}".format("_file_path_list", len(_file_path_list), type(_file_path_list)))
+    # print("{} -> data: {}, type: {}".format("_rz_size_x", _rz_size_x, type(_rz_size_x)))
+    # print("{} -> data: {}, type: {}".format("_rz_size_y", _rz_size_y, type(_rz_size_y)))
+    # print("{} -> data: {}, type: {}".format("_return_dict", _return_dict, type(_return_dict)))
 
     failed_file_list = check_img_size_and_remove(_file_path_list, _rz_size_x, _rz_size_y)
     _return_dict[_task_number] = failed_file_list
@@ -173,3 +185,56 @@ def main(_task_number, _file_path_list, _rz_size_x, _rz_size_y, _return_dict):
     end = datetime.datetime.now()
     result = end - start
     print("End Process: \033[38;5;13m {} \033[0m Times : \033[38;5;14m {} \033[0m".format(_task_number, result))
+
+if __name__ == "__main__":
+    multiprocessing.freeze_support()  # for multiprocessing other process on windows
+    start = datetime.datetime.now()
+
+    data_list = [
+        search_directory(r"E:\dataset\2호기 미분류 이미지\RT 분류\NG", "*", True),
+    ]
+
+    data_list = list_flatten(data_list)
+    random.shuffle(data_list)
+
+    number_of_Process = 1
+    number_of_data = len(data_list)
+    number_of_task = math.ceil(number_of_data / number_of_Process)
+
+    print("number of data: \033[38;5;14m {} \033[0m".format(number_of_data))
+    print("number of task: \033[38;5;14m {} \033[0m".format(number_of_task))
+
+    task_list = list_chunk(data_list, number_of_task)
+    setting_process = len(task_list)
+
+    print("setting process : \033[38;5;14m {} \033[0m".format(number_of_Process),
+          "activate process: \033[38;5;9m {} \033[0m".format(setting_process))
+
+    manager = multiprocessing.Manager()
+    return_dict = manager.dict()
+
+    jobs = []
+
+    size_x = 255
+    size_y = 256
+
+    for task_number in range(setting_process):
+        process = Process(target=main,
+                          args=(task_number, task_list[task_number], size_x, size_y, return_dict))
+        jobs.append(process)
+        process.start()
+
+    for proc in jobs:
+        proc.join()
+
+    for data in return_dict.keys():
+        print(data)
+
+    for data in return_dict.values():
+        print(len(data))
+
+    end = datetime.datetime.now()
+    result = end - start
+    print("\n")
+    print(result)
+    print(result.microseconds / 1000000)

@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>404</width>
-    <height>432</height>
+    <height>448</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -107,6 +107,21 @@
        </property>
        <item row="0" column="0">
         <layout class="QVBoxLayout" name="verticalLayout">
+         <property name="spacing">
+          <number>7</number>
+         </property>
+         <property name="leftMargin">
+          <number>10</number>
+         </property>
+         <property name="topMargin">
+          <number>0</number>
+         </property>
+         <property name="rightMargin">
+          <number>10</number>
+         </property>
+         <property name="bottomMargin">
+          <number>0</number>
+         </property>
          <item>
           <layout class="QHBoxLayout" name="horizontalLayout_2">
            <item>
@@ -117,20 +132,11 @@
             </widget>
            </item>
            <item>
-            <widget class="QLineEdit" name="le_x_size"/>
-           </item>
-           <item>
-            <spacer name="horizontalSpacer_2">
-             <property name="orientation">
-              <enum>Qt::Horizontal</enum>
+            <widget class="QLineEdit" name="le_x_size">
+             <property name="text">
+              <string>0</string>
              </property>
-             <property name="sizeHint" stdset="0">
-              <size>
-               <width>40</width>
-               <height>20</height>
-              </size>
-             </property>
-            </spacer>
+            </widget>
            </item>
            <item>
             <widget class="QLabel" name="label_3">
@@ -140,7 +146,11 @@
             </widget>
            </item>
            <item>
-            <widget class="QLineEdit" name="le_y_size"/>
+            <widget class="QLineEdit" name="le_y_size">
+             <property name="text">
+              <string>0</string>
+             </property>
+            </widget>
            </item>
           </layout>
          </item>
@@ -156,14 +166,14 @@
            <item>
             <widget class="QLineEdit" name="le_Processor_numbers">
              <property name="text">
-              <string/>
+              <string>0</string>
              </property>
             </widget>
            </item>
           </layout>
          </item>
          <item>
-          <widget class="QTextBrowser" name="textBrowser"/>
+          <widget class="QTextBrowser" name="txtbw_status"/>
          </item>
          <item>
           <layout class="QHBoxLayout" name="horizontalLayout_5">
