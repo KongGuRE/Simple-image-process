@@ -12,6 +12,9 @@ from PIL import Image
 import shutil
 from tqdm import tqdm
 
+import PIL
+
+PIL.Image.MAX_IMAGE_PIXELS = 933120000
 
 def createFolder(_directory):
     """폴더의 유무 확인후 없으면 만들기.
@@ -151,11 +154,11 @@ def del_ex(_file_rm_data_name: list) -> List[str]:
         if len(_file_rm_data_name) > 0:
             for _rm_file in _file_rm_data_name:
                 try:
-                    # print("Delete files: \033[38;5;14m {} \033[0m".format(_rm_file))
+                    print("Delete files: \033[38;5;14m {} \033[0m".format(_rm_file))
                     os.unlink(_rm_file)
                 except OSError as err:
                     failed_file_list.append(_rm_file)
-                    # print("\033[38;5;9m Failed to delete file : {} \033[0m".format(_rm_file))
+                    print("\033[38;5;9m Failed to delete file : {} \033[0m".format(_rm_file))
                     # print(err)
     else:
         pass
@@ -180,6 +183,7 @@ def main(_task_number: int, _file_path_list: list, _rz_size_x: int, _rz_size_y: 
     # print("{} -> data: {}, type: {}".format("_return_dict", _return_dict, type(_return_dict)))
 
     failed_file_list = check_img_size_and_remove(_file_path_list, _rz_size_x, _rz_size_y)
+    failed_file_list = del_ex(failed_file_list)
     _return_dict[_task_number] = failed_file_list
 
     end = datetime.datetime.now()
