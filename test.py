@@ -1,124 +1,174 @@
-import sys
-from PyQt5.QtWidgets import *
-from PyQt5 import uic
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
 
-import Integrated_image_processing as Iip
-
-import datetime
-import glob
-import math
-import multiprocessing
-import os
-import random
-from typing import List
-
-import cv2
-from PIL import Image
-
-# UI파일 연결
-# 단, UI파일은 Python 코드 파일과 같은 디렉토리에 위치해야한다.
-form_class = uic.loadUiType("main.ui")[0]
+from PyQt5.QtCore import Qt
+from PyQt5.QtGui import QImage, QPixmap, QPalette, QPainter
+from PyQt5.QtPrintSupport import QPrintDialog, QPrinter
+from PyQt5.QtWidgets import QLabel, QSizePolicy, QScrollArea, QMessageBox, QMainWindow, QMenu, QAction, \
+    qApp, QFileDialog
 
 
-# 화면을 띄우는데 사용되는 Class 선언
-class WindowClass(QMainWindow, form_class):
+class QImageViewer(QMainWindow):
     def __init__(self):
         super().__init__()
+        self.printer = QPrinter()
+        self.scaleFactor = 0.0
 
-        self.setupUi(self)
+        self.imageLabel = QLabel()
+        self.imageLabel.setBackgroundRole(QPalette.Base)
+        self.imageLabel.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
+        self.imageLabel.setScaledContents(True)
 
-        self.manager = multiprocessing.Manager()
-        self.return_dict = self.manager.dict()
-        self.process = multiprocessing.Process.__init__(self)
+        self.scrollArea = QScrollArea()
+        self.scrollArea.setBackgroundRole(QPalette.Dark)
+        self.scrollArea.setWidget(self.imageLabel)
+        self.scrollArea.setVisible(False)
 
-        # 버튼
-        self.btn_main_start.clicked.connect(self.btn_main_start_clicked)
-        self.btn_main_stop.clicked.connect(self.btn_main_stop_clicked)
+        self.setCentralWidget(self.scrollArea)
 
-    def btn_main_start_clicked(self):
-        # 변수
+        self.openAct = QAction("&Open...", self, shortcut="Ctrl+O", triggered=self.open)
+        self.printAct = QAction("&Print...", self, shortcut="Ctrl+P", enabled=False, triggered=self.print_)
+        self.exitAct = QAction("E&xit", self, shortcut="Ctrl+Q", triggered=self.close)
+        self.zoomInAct = QAction("Zoom &In (25%)", self, shortcut="Ctrl++", enabled=False, triggered=self.zoomIn)
+        self.zoomOutAct = QAction("Zoom &Out (25%)", self, shortcut="Ctrl+-", enabled=False, triggered=self.zoomOut)
+        self.normalSizeAct = QAction("&Normal Size", self, shortcut="Ctrl+S", enabled=False, triggered=self.normalSize)
+        self.fitToWindowAct = QAction("&Fit to Window", self, enabled=False, checkable=True, shortcut="Ctrl+F",triggered=self.fitToWindow)
+        self.aboutAct = QAction("&About", self, triggered=self.about)
+        self.aboutQtAct = QAction("About &Qt", self, triggered=qApp.aboutQt)
 
-        self.process = multiprocessing.Process(target=self.btn_main_start_clicked_process,
-                                               args=(self.le_datapath.text(),
-                                                     self.le_ext.text(),
-                                                     int(self.le_x_size.text()),
-                                                     int(self.le_y_size.text()),
-                                                     self.ckb_subfolders.isChecked(),
-                                                     int(self.le_Processor_numbers.text()),
-                                                     self.return_dict
-                                                     ))
-        self.process.start()
+        self.createMenus()
 
-    def btn_main_stop_clicked(self):
-        self.process.join()
+        self.setWindowTitle("Image Viewer")
+        self.resize(800, 600)
 
-        for data in self.return_dict.keys():
-            print(data)
+    def open(self):
+        options = QFileDialog.Options()
+        # fileName = QFileDialog.getOpenFileName(self, "Open File", QDir.currentPath())
+        fileName, _ = QFileDialog.getOpenFileName(self, 'QFileDialog.getOpenFileName()', '',
+                                                  'Images (*.png *.jpeg *.jpg *.bmp *.gif)', options=options)
+        if fileName:
+            image = QImage(fileName)
+            if image.isNull():
+                QMessageBox.information(self, "Image Viewer", "Cannot load %s." % fileName)
+                return
 
-        for data in self.return_dict.values():
-            print(len(data))
+            self.imageLabel.setPixmap(QPixmap.fromImage(image))
+            self.scaleFactor = 1.0
 
-    @staticmethod
-    def btn_main_start_clicked_process(data_path,
-                                       data_ext,
-                                       sub_folders,
-                                       size_x, size_y, number_of_Process,
-                                       return_dict):
+            self.scrollArea.setVisible(True)
+            self.printAct.setEnabled(True)
+            self.fitToWindowAct.setEnabled(True)
+            self.updateActions()
 
-        # test_list = [
-        #     self.le_datapath.text(),
-        #     self.le_ext.text(),
-        #     int(self.le_x_size.text()),
-        #     int(self.le_y_size.text()),
-        #     self.ckb_subfolders.isChecked(),
-        #     int(self.le_Processor_numbers.text())
-        # ]
-        # for test in test_list:
-        #     print(test)
-        #     print(type(test))
-        # exit()
+            if not self.fitToWindowAct.isChecked():
+                self.imageLabel.adjustSize()
 
-        data_list = [
-            Iip.search_directory(data_path, data_ext, sub_folders)
-        ]
+    def print_(self):
+        painter = QPainter(self.printer)
+        # rect = painter.viewport()
+        # size = self.imageLabel.pixmap().size()
+        # size.scale(rect.size(), Qt.KeepAspectRatio)
+        # painter.setViewport(rect.x(), rect.y(), size.width(), size.height())
+        print(self.imageLabel.pixmap().rect())
+        painter.setWindow(self.imageLabel.pixmap().rect())
+        painter.drawPixmap(0, 0, self.imageLabel.pixmap())
 
-        data_list = Iip.list_flatten(data_list)
-        random.shuffle(data_list)
+        # dialog = QPrintDialog(self.printer, self)
+        # if dialog.exec_():
+        #     painter = QPainter(self.printer)
+        #     rect = painter.viewport()
+        #     size = self.imageLabel.pixmap().size()
+        #     size.scale(rect.size(), Qt.KeepAspectRatio)
+        #     painter.setViewport(rect.x(), rect.y(), size.width(), size.height())
+        #     painter.setWindow(self.imageLabel.pixmap().rect())
+        #     painter.drawPixmap(0, 0, self.imageLabel.pixmap())
 
-        number_of_data = len(data_list)
-        number_of_task = math.ceil(number_of_data / number_of_Process)
+    def zoomIn(self):
+        self.scaleImage(1.25)
 
-        print("number of data: \033[38;5;14m {} \033[0m".format(number_of_data))
-        print("number of task: \033[38;5;14m {} \033[0m".format(number_of_task))
+    def zoomOut(self):
+        self.scaleImage(0.8)
 
-        task_list = Iip.list_chunk(data_list, number_of_task)
-        setting_process = len(task_list)
+    def normalSize(self):
+        self.imageLabel.adjustSize()
+        self.scaleFactor = 1.0
 
-        print("setting process : \033[38;5;14m {} \033[0m".format(number_of_Process),
-              "activate process: \033[38;5;9m {} \033[0m".format(setting_process))
+    def fitToWindow(self):
+        fitToWindow = self.fitToWindowAct.isChecked()
+        self.scrollArea.setWidgetResizable(fitToWindow)
+        if not fitToWindow:
+            self.normalSize()
 
-        jobs = []
+        self.updateActions()
 
-        for task_number in range(setting_process):
-            process = multiprocessing.Process(target=Iip.main,
-                                              args=(task_number, task_list[task_number], size_x, size_y, return_dict))
-            jobs.append(process)
-            process.start()
+    def about(self):
+        QMessageBox.about(self, "About Image Viewer",
+                          "<p>The <b>Image Viewer</b> example shows how to combine "
+                          "QLabel and QScrollArea to display an image. QLabel is "
+                          "typically used for displaying text, but it can also display "
+                          "an image. QScrollArea provides a scrolling view around "
+                          "another widget. If the child widget exceeds the size of the "
+                          "frame, QScrollArea automatically provides scroll bars.</p>"
+                          "<p>The example demonstrates how QLabel's ability to scale "
+                          "its contents (QLabel.scaledContents), and QScrollArea's "
+                          "ability to automatically resize its contents "
+                          "(QScrollArea.widgetResizable), can be used to implement "
+                          "zooming and scaling features.</p>"
+                          "<p>In addition the example shows how to use QPainter to "
+                          "print an image.</p>")
 
-        for proc in jobs:
-            proc.join()
+    def createMenus(self):
+        self.fileMenu = QMenu("&File", self)
+        self.fileMenu.addAction(self.openAct)
+        self.fileMenu.addAction(self.printAct)
+        self.fileMenu.addSeparator()
+        self.fileMenu.addAction(self.exitAct)
+
+        self.viewMenu = QMenu("&View", self)
+        self.viewMenu.addAction(self.zoomInAct)
+        self.viewMenu.addAction(self.zoomOutAct)
+        self.viewMenu.addAction(self.normalSizeAct)
+        self.viewMenu.addSeparator()
+        self.viewMenu.addAction(self.fitToWindowAct)
+
+        self.helpMenu = QMenu("&Help", self)
+        self.helpMenu.addAction(self.aboutAct)
+        self.helpMenu.addAction(self.aboutQtAct)
+
+        self.menuBar().addMenu(self.fileMenu)
+        self.menuBar().addMenu(self.viewMenu)
+        self.menuBar().addMenu(self.helpMenu)
+
+    def updateActions(self):
+        self.zoomInAct.setEnabled(not self.fitToWindowAct.isChecked())
+        self.zoomOutAct.setEnabled(not self.fitToWindowAct.isChecked())
+        self.normalSizeAct.setEnabled(not self.fitToWindowAct.isChecked())
+
+    def scaleImage(self, factor):
+        self.scaleFactor *= factor
+        self.imageLabel.resize(self.scaleFactor * self.imageLabel.pixmap().size())
+
+        self.adjustScrollBar(self.scrollArea.horizontalScrollBar(), factor)
+        self.adjustScrollBar(self.scrollArea.verticalScrollBar(), factor)
+
+        self.zoomInAct.setEnabled(self.scaleFactor < 3.0)
+        self.zoomOutAct.setEnabled(self.scaleFactor > 0.333)
+
+    def adjustScrollBar(self, scrollBar, factor):
+        scrollBar.setValue(int(factor * scrollBar.value()
+                               + ((factor - 1) * scrollBar.pageStep() / 2)))
 
 
-if __name__ == "__main__":
-    multiprocessing.freeze_support()  # for multiprocessing other process on windows
-    # QApplication : 프로그램을 실행시켜주는 클래스
+if __name__ == '__main__':
+    import sys
+    from PyQt5.QtWidgets import QApplication
+
     app = QApplication(sys.argv)
-
-    # WindowClass의 인스턴스 생성
-    myWindow = WindowClass()
-
-    # 프로그램 화면을 보여주는 코드
-    myWindow.show()
-
-    # 프로그램을 이벤트루프로 진입시키는(프로그램을 작동시키는) 코드
-    app.exec_()
+    imageViewer = QImageViewer()
+    imageViewer.show()
+    sys.exit(app.exec_())
+    # TODO QScrollArea support mouse
+    # base on https://github.com/baoboa/pyqt5/blob/master/examples/widgets/imageviewer.py
+    #
+    # if you need Two Image Synchronous Scrolling in the window by PyQt5 and Python 3
+    # please visit https://gist.github.com/acbetter/e7d0c600fdc0865f4b0ee05a17b858f2

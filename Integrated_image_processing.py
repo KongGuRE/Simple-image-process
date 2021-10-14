@@ -168,8 +168,8 @@ def del_ex(_file_rm_data_name: list) -> List[str]:
 
 def check_img_size_and_remove(_file_path_list: list, _rz_size_x: int, _rz_size_y: int) -> List[str]:
     _rm_data_list = check_img_size(_file_path_list, _rz_size_x, _rz_size_y)
-    _failed_file_list = del_ex(_rm_data_list)
-    return _failed_file_list
+    # _rm_data_list = del_ex(_rm_data_list)
+    return _rm_data_list
 
 
 def main(_task_number: int, _file_path_list: list, _rz_size_x: int, _rz_size_y: int, _return_dict: dict):
@@ -183,12 +183,14 @@ def main(_task_number: int, _file_path_list: list, _rz_size_x: int, _rz_size_y: 
     # print("{} -> data: {}, type: {}".format("_return_dict", _return_dict, type(_return_dict)))
 
     failed_file_list = check_img_size_and_remove(_file_path_list, _rz_size_x, _rz_size_y)
-    failed_file_list = del_ex(failed_file_list)
+    # failed_file_list = del_ex(failed_file_list)
     _return_dict[_task_number] = failed_file_list
 
     end = datetime.datetime.now()
     result = end - start
     print("End Process: \033[38;5;13m {} \033[0m Times : \033[38;5;14m {} \033[0m".format(_task_number, result))
+
+    return failed_file_list
 
 if __name__ == "__main__":
     multiprocessing.freeze_support()  # for multiprocessing other process on windows

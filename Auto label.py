@@ -5,6 +5,8 @@ from typing import List
 import logging
 from logging.config import dictConfig
 
+
+
 dictConfig({
     'version': 1,
     'formatters': {
@@ -116,7 +118,7 @@ class provisional_auto_label:
                             file_data["{}".format(data)] = []
         return file_data
 
-    def read_def_file_and_Auto_labeling(self, _data_dir_path):
+    def read_def_file_and_Auto_labeling_custom(self, _data_dir_path):
         def_files_list = self.search_directory(_data_dir_path, ".def", _all_sub_folders=True)
 
         failed_copy_file = []
@@ -134,28 +136,32 @@ class provisional_auto_label:
             for data_number in range(len(def_files_data["NO"])):
                 # print(os.path.join(classification_data_path, def_files_data["VISIONTYPE"][data_number]))
                 classification_data_path = os.path.join(def_files_dir_name, "python_classification")
+
+                VISIONTYPE_data_path = os.path.join(classification_data_path, def_files_data["VISIONTYPE"][data_number])
+
                 if def_files_data["VERIFY"][data_number] == '':
-                    VERIFY_data_path = os.path.join(classification_data_path, "Not defined")
+                    pass
+                    # VERIFY_data_path = os.path.join(VISIONTYPE_data_path, "Not defined")
                 else:
-                    VERIFY_data_path = os.path.join(classification_data_path, def_files_data["VERIFY"][data_number])
+                    VERIFY_data_path = os.path.join(VISIONTYPE_data_path, def_files_data["VERIFY"][data_number])
 
-                VISIONTYPE_data_path = os.path.join(VERIFY_data_path, def_files_data["VISIONTYPE"][data_number])
+                    DEFECTNAME_data_path = os.path.join(VERIFY_data_path, def_files_data["DEFECTNAME"][data_number])
 
-                DEFECTNAME_data_path = os.path.join(VISIONTYPE_data_path, def_files_data["DEFECTNAME"][data_number])
+                    copy_file_path = DEFECTNAME_data_path
 
-                self.createFolder(DEFECTNAME_data_path)
+                    self.createFolder(copy_file_path)
 
-                # print(VISIONTYPE_data_path)
+                    # print(copy_file_path)
 
-                expect_copy_data = os.path.join(def_files_dir_name, "Images",
-                                                def_files_data["VISIONTYPE"][data_number],
-                                                def_files_data["COLORIMAGE"][data_number]
-                                                )
+                    expect_copy_data = os.path.join(def_files_dir_name, "Images",
+                                                    def_files_data["VISIONTYPE"][data_number],
+                                                    def_files_data["COLORIMAGE"][data_number]
+                                                    )
 
-                try:
-                    shutil.copy2(expect_copy_data, DEFECTNAME_data_path)
-                except:
-                    failed_copy_file.append(expect_copy_data)
+                    try:
+                        shutil.copy2(expect_copy_data, copy_file_path)
+                    except:
+                        failed_copy_file.append(expect_copy_data)
 
             for data in failed_copy_file:
                 print(data)
