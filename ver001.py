@@ -13,8 +13,9 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
+
         MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(807, 618)
+        MainWindow.resize(1200, 800)
         MainWindow.setStyleSheet("background-color: rgb(37, 37, 38);")
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
@@ -74,8 +75,10 @@ class Ui_MainWindow(object):
         self.le_test.setText(_translate("MainWindow", "1.jpg"))
 
     def btn_test_clicked(self, event):
+        self.widget.change_drawing_color((100, 100, 0))
+        self.widget.change_drawing_size(1)
         self.widget.input_image(self.le_test.text())
-        self.widget.display_imgPainter()
+        self.widget.test_reprint()
 
 
 from test3 import myWindow

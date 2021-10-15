@@ -25,12 +25,13 @@ class myWindow(QWidget):
     drawing_image: QImage
     scaledImg: QPixmap
 
+    move_image_offset: QPoint
     singleOffset: QPoint
     lastPoint: QPoint
 
     def __init__(self):
         super(myWindow, self).__init__()
-        self.resize(450, 450)
+        self.resize(500, 500)
         self.setWindowTitle("Picture manipulation")
 
         self.mouse_left_click: bool = False
@@ -45,24 +46,33 @@ class myWindow(QWidget):
         self.drawing_img: np.array = None
         self.conv_image: np.array = None
 
-    @staticmethod
-    def Test_print():
-        print("\033[38;5;9mok\033[0m")
+        self.drawing_start_point: QPoint = QPoint(0, 0)
+        self.drawing_end_point: QPoint = QPoint(0, 0)
 
-    def conv(self):
-        color_img = np.zeros((240, 320, 3), dtype=np.uint8)
-        cv2.imshow('color_img', color_img)
+        self.drawing_color: tuple = (100, 100, 100)
+        self.scaleFactor = 1.0
 
-    def save_macked_file(self):
-        createFolder("python_")
-        cv2.imwrite('python_/grayIronMan.jpg', self.drawing_img)
+        self.drawing_size = 1
+
+        self.drawing_btn_ck: bool = False
+        self.flood_fill_btn_ck: bool = False
+
 
     def input_image(self, path):
+        self.scaleFactor = 1.0
+        self.drawing_start_point: QPoint = QPoint(0, 0)
+        self.drawing_end_point: QPoint = QPoint(0, 0)
+        self.singleOffset = QPoint(0, 0)
+
         # print(path)
         try:
             # opencv 이미지 불러오기
             self.cv_img = cv2.imread(path)
             # 라벨 이미지 데이터 만들기
+
+            # print(myWindow.x)
+
+
             h, w, c = self.cv_img.shape
 
             self.drawing_img = np.full((h, w, c), (0, 0, 0), dtype=np.uint8)
@@ -85,19 +95,45 @@ class myWindow(QWidget):
             # myWindow.imgPixmap = QPixmap(path)  # Load Images
 
             self.image_input_bool = True
-            self.scaledImg = myWindow.imgPixmap.scaled(myWindow.imgPixmap.width(), myWindow.imgPixmap.height())
+            myWindow.scaledImg = myWindow.imgPixmap.scaled(myWindow.imgPixmap.width(), myWindow.imgPixmap.height())
             # Initialize zoom
 
             self.singleOffset = QPoint(0, 0)  # Initialize offset value
+            self.move_image_offset = QPoint(0, 0)  # Initialize offset value
 
         except OSError as err:
             print("ERROR :\033[38;5;9m {} \033[0m".format(err))
 
+    @staticmethod
+    def Test_print():
+        print("\033[38;5;9mok\033[0m")
+
+    def test_reprint(self):
+        self.repaint()
+
+    def conv(self):
+        color_img = np.zeros((240, 320, 3), dtype=np.uint8)
+        cv2.imshow('color_img', color_img)
+
+    def save_macked_file(self):
+        createFolder("python_")
+        cv2.imwrite('python_/grayIronMan.jpg', self.drawing_img)
+
+    def change_drawing_color(self, _color: tuple):
+        self.drawing_color = _color
+
+    def change_drawing_size(self, _size: int):
+        self.drawing_size = _size
+
     def paintEvent(self, event):
         if self.image_input_bool:
-            self.display_imgPainter()
+            self.displayImgPainter()
 
-    def display_imgPainter(self):
+    # def floodFill(self):
+    #     self.drawing_img
+    #     cv2.floodFill()
+
+    def displayImgPainter(self):
         print("def Start: \033[38;5;13m {} \033[0m Times : \033[38;5;14m {} \033[0m".format(
             "display_imgPainter", "0"))
 
@@ -111,7 +147,8 @@ class myWindow(QWidget):
         # myWindow.imgPixmap = QPixmap(path)  # Load Images
 
         self.image_input_bool = True
-        self.scaledImg = myWindow.imgPixmap.scaled(myWindow.imgPixmap.width(), myWindow.imgPixmap.height())
+        myWindow.scaledImg = myWindow.imgPixmap.scaled(round(myWindow.imgPixmap.width() * self.scaleFactor),
+                                                       round(myWindow.imgPixmap.height() * self.scaleFactor))
         # Initialize zoom
 
         """
@@ -122,7 +159,7 @@ class myWindow(QWidget):
         # img_drawing_Painter = QPainter()
 
         img_Painter.begin(self)
-        img_Painter.drawPixmap(self.singleOffset, self.scaledImg)
+        img_Painter.drawPixmap(self.singleOffset, myWindow.scaledImg)
 
         print("def End: \033[38;5;13m {} \033[0m Times : \033[38;5;14m {} \033[0m".format(
             "display_imgPainter", "1"))
@@ -155,8 +192,8 @@ class myWindow(QWidget):
             self.mouse_left_click = False
             self.mouse_raight_click = False
             self.mouse_middle_click = True
-
             self.preMousePosition = event.pos()
+
         elif event.buttons() == QtCore.Qt.LeftButton | QtCore.Qt.RightButton:
             print("Click left and right at the same time")  # Response test statement
         elif event.buttons() == QtCore.Qt.LeftButton | QtCore.Qt.MidButton:
@@ -169,48 +206,45 @@ class myWindow(QWidget):
 
     '''Reload the scroll event'''
 
-    # def wheelEvent(self, event):
-    #     angle = event.angleDelta() / 8
-    #     angleX = angle.x()
-    #     angleY = angle.y()
-    #
-    #     if angleY > 0:
-    #         print("Middle mouse button up")
-    #         self.scaledImg = myWindow.imgPixmap.scaled(self.scaledImg.width() + 5,
-    #                                                self.scaledImg.height() + 5)
-    #         newWidth = event.x() - (self.scaledImg.width() * (event.x() - self.singleOffset.x())) \
-    #                    / (self.scaledImg.width() - 5)
-    #         newHeight = event.y() - (self.scaledImg.height() * (event.y() - self.singleOffset.y())) \
-    #                     / (self.scaledImg.height() - 5)
-    #         self.singleOffset = QPoint(newWidth, newHeight)
-    #         self.repaint()
-    #     else:
-    #         print("Middle mouse button down")
-    #         self.scaledImg = myWindow.imgPixmap.scaled(self.scaledImg.width() - 5,
-    #                                                self.scaledImg.height() - 5)
-    #         newWidth = event.x() - (self.scaledImg.width() * (event.x() - self.singleOffset.x())) \
-    #                    / (self.scaledImg.width() + 5)
-    #         newHeight = event.y() - (self.scaledImg.height() * (event.y() - self.singleOffset.y())) \
-    #                     / (self.scaledImg.height() + 5)
-    #         self.singleOffset = QPoint(newWidth, newHeight)
-    #         self.repaint()
+    def wheelEvent(self, event):
+        angle = event.angleDelta() / 8
+        angleX = angle.x()
+        angleY = angle.y()
+
+        if angleY > 0:
+            print("Middle mouse button up")
+            self.scaleFactor *= 1.1
+            newWidth = event.x() - (self.scaledImg.width() * (event.x()-self.singleOffset.x())) \
+                        / (self.scaledImg.width()-self.scaleFactor)
+            newHeight = event.y() - (self.scaledImg.height() * (event.y()-self.singleOffset.y())) \
+                        / (self.scaledImg.height()-self.scaleFactor)
+            self.singleOffset = QPoint(newWidth, newHeight)
+            self.repaint()
+        else:
+            print("Middle mouse button down")
+            self.scaleFactor *= 0.9
+            # newWidth = event.x() - (myWindow.scaledImg.width() * (event.x() - self.singleOffset.x())) \
+            #            / (myWindow.scaledImg.width() + self.scaleFactor)
+            # newHeight = event.y() - (myWindow.scaledImg.height() * (event.y() - self.singleOffset.y())) \
+            #             / (myWindow.scaledImg.height() + self.scaleFactor)
+            # self.singleOffset = QPoint(newWidth, newHeight)
+            self.repaint()
 
     '''Reload mouse button to expose events'''
 
     def mouseReleaseEvent(self, event):
-        print("event.button: \033[38;5;14m {} \033[0m".format(event.button))
-        print("Qt.LatinButton: \033[38;5;14m {} \033[0m".format(QtCore.Qt.LeftButton))
-        print("Qt.RightButton: \033[38;5;14m {} \033[0m".format(Qt.RightButton))
-
-        print(QtCore.Qt.LeftButton)
-        print(event.buttons())
+        # print("event.button: \033[38;5;14m {} \033[0m".format(event.button))
+        # print("Qt.LatinButton: \033[38;5;14m {} \033[0m".format(QtCore.Qt.LeftButton))
+        # print("Qt.RightButton: \033[38;5;14m {} \033[0m".format(Qt.RightButton))
+        # print(QtCore.Qt.LeftButton)
+        # print(event.buttons())
         if event.button == Qt.LeftButton:
             self.drawing = False
             self.mouse_left_click = False
             print("Release the left mouse button")
         elif event.button == Qt.RightButton:
             # self.singleOffset = QPoint(0, 0)
-            # self.scaledImg = myWindow.imgPixmap.scaled(self.size())
+            # myWindow.scaledImg = myWindow.imgPixmap.scaled(self.size())
             self.repaint()
             print("Right click to release")
 
@@ -219,26 +253,24 @@ class myWindow(QWidget):
     def mouseMoveEvent(self, event):
 
         if self.mouse_left_click and self.drawing:
-            self.lastPoint = self.singleOffset + self.lastPoint
+            self.drawing_start_point = self.lastPoint - self.singleOffset
+            self.drawing_end_point = event.pos() - self.singleOffset
 
-            print("event.pos():\033[38;5;14m {} \033[0m".format(event.pos().x()))
-            print("X:\033[38;5;14m {} \033[0m, Y:\033[38;5;14m {} \033[0m ".format(event.x(), event.y()))
-            print("lastPoint X:\033[38;5;14m {} \033[0m, lastPoint Y:\033[38;5;14m {} \033[0m ".format(
-                self.lastPoint.x(), self.lastPoint.y()))
-            print(self.drawing_img.shape)
+            print("S X:\033[38;5;14m {} \033[0m, S Y:\033[38;5;14m {} \033[0m ".format(
+                self.drawing_start_point.x(), self.drawing_start_point.y()))
+            print("E X:\033[38;5;14m {} \033[0m, E Y:\033[38;5;14m {} \033[0m ".format(
+                self.drawing_end_point.x(), self.drawing_end_point.y()))
 
             cv2.line(self.drawing_img,
-                     (self.lastPoint.x(), self.lastPoint.y()),
-                     (event.x(), event.y()), (0, 0, 255), 2, cv2.LINE_AA)
+                     (round(self.drawing_start_point.x()/self.scaleFactor),
+                      round(self.drawing_start_point.y()/self.scaleFactor)),
+                     (round(self.drawing_end_point.x()/self.scaleFactor),
+                      round(self.drawing_end_point.y()/self.scaleFactor)),
+                     self.drawing_color, self.drawing_size, cv2.LINE_AA)
+
             self.lastPoint = event.pos()
             cv2.imshow("color_img", self.drawing_img)
             self.repaint()
-            # self.Test_print()
-            # painter = QPainter(self.scaledImg)
-            # painter.setPen(QPen(QColor(255, 0, 0, 90), 5, Qt.SolidLine))
-            # painter.drawLine(self.lastPoint, event.pos())
-            # self.lastPoint = event.pos()
-            # self.update()
 
         if self.mouse_middle_click:
             print("Press the left mouse button to move the mouse")
@@ -274,8 +306,9 @@ class myWindow(QWidget):
 if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
     myshow = myWindow()
-    myshow.input_image("3.jpg")
-    myshow.save_macked_file()
+    myshow.input_image("2.jpg")
+    myshow.change_drawing_color((100, 100, 0))
+    # myshow.save_macked_file()
     # myshow.conv()
 
     myshow.show()
