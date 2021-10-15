@@ -75,10 +75,11 @@ class Ui_MainWindow(object):
         self.le_test.setText(_translate("MainWindow", "1.jpg"))
 
     def btn_test_clicked(self, event):
-        self.widget.change_drawing_color((100, 100, 0))
-        self.widget.change_drawing_size(1)
-        self.widget.input_image(self.le_test.text())
-        self.widget.test_reprint()
+        self.widget.changeImageTool("drawing")
+        self.widget.changeDrawingColor((100, 100, 0))
+        self.widget.changeDrawingSize(1)
+        self.widget.inputImage(self.le_test.text())
+        self.widget.imageReprint()
 
 
 from test3 import myWindow
