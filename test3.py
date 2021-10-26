@@ -11,6 +11,7 @@ from matplotlib import pyplot as plt
 
 import numpy as np
 import cv2
+import copy
 
 from easy_file_control import *
 
@@ -43,7 +44,7 @@ class myWindow(QWidget):
         self.image_input_bool: bool = False
 
         self.cv_img: np.array = None
-        self.drawing_img: np.array = None
+        self.drawing_img: np.array = np.array([])
         self.conv_image: np.array = None
 
         self.drawing_color: tuple = (100, 100, 100)
@@ -53,6 +54,10 @@ class myWindow(QWidget):
 
         self.drawing_btn_ck: bool = False
         self.flood_fill_btn_ck: bool = False
+
+        self.mask_image_backup: list = []
+        self.mask_image_del_data_backup: list = []
+        self.mask_image_backup_count: int = 0
 
     def inputImage(self, path):
         self.scaleFactor = 1.0
@@ -79,7 +84,13 @@ class myWindow(QWidget):
             # Initialize zoom
 
             self.singleOffset = QPoint(0, 0)  # Initialize offset value
-            self.move_image_offset = QPoint(0, 0)  # Initialize offset value
+
+            self.mask_image_backup: list = []
+            self.mask_image_del_data_backup: list = []
+            self.mask_image_backup_count: int = 0
+
+            self.mask_image_backup.append(copy.deepcopy(self.drawing_img))
+            print(len(self.mask_image_backup))
 
         except OSError as err:
             print("ERROR :\033[38;5;9m {} \033[0m".format(err))
@@ -87,6 +98,11 @@ class myWindow(QWidget):
     @staticmethod
     def Test_print():
         print("\033[38;5;9mok\033[0m")
+
+    def maskImageReverse(self, _data):
+        if self.mask_image_backup_count != 0:
+            pass
+        self.mask_image_backup.append(_data)
 
     def imageReprint(self):
         self.repaint()
@@ -128,8 +144,9 @@ class myWindow(QWidget):
             cv2.imshow("color_img", self.drawing_img)
 
     def displayImgPainter(self):
-        print("def Start: \033[38;5;13m {} \033[0m Times : \033[38;5;14m {} \033[0m".format(
-            "display_imgPainter", "0"))
+        # paintEvent 확인용
+        # print("def Start: \033[38;5;13m {} \033[0m Times : \033[38;5;14m {} \033[0m".format(
+        #     "display_imgPainter", "0"))
 
         self.conv_image = cv2.addWeighted(self.cv_img, 1, self.drawing_img, 0.8, 0)
 
@@ -155,31 +172,98 @@ class myWindow(QWidget):
         img_Painter.begin(self)
         img_Painter.drawPixmap(self.singleOffset, myWindow.scaledImg)
 
-        print("def End: \033[38;5;13m {} \033[0m Times : \033[38;5;14m {} \033[0m".format(
-            "display_imgPainter", "1"))
+        # paintEvent 확인용
+        # print("def End: \033[38;5;13m {} \033[0m Times : \033[38;5;14m {} \033[0m".format(
+        #     "display_imgPainter", "1"))
 
     def coordinatesFloodFill(self, _coordinates: QPoint):
-        point = _coordinates - self.singleOffset
+        print(
+            "S X:\033[38;5;14m {} \033[0m, S Y:\033[38;5;14m {} \033[0m ".format(_coordinates.x(), _coordinates.y()))
 
-        h, w, c = self.drawing_img.shape
-        mask = np.zeros((h + 2, w + 2), np.uint8)
+        try:
+            loc_x = round((_coordinates.x() - self.singleOffset.x()) / self.scaleFactor)
+            loc_y = round((_coordinates.y() - self.singleOffset.y()) / self.scaleFactor)
 
-        mask[0:3, :] = 255
-        mask[:, 0:3] = 255
-        mask[:, w-1: w + 2] = 255
-        mask[h-1:h+2, :] = 255
+            h, w, c = self.drawing_img.shape
+            if loc_x >= w:
+                loc_x = w-1
+            elif loc_x < 0:
+                loc_x = 0
 
-        print(self.drawing_img.shape)
-        print(mask.shape)
-        # mask = np.full((h+2, w+2), (0, 0), dtype=np.uint8)
+            if loc_y >= h:
+                loc_y = h-1
+            elif loc_y < 0:
+                loc_y = 0
 
-        loDiff, upDiff = (0, 0, 0), (100, 100, 100)
-        seed = (point.x(), point.y())
+            print("loc X:\033[38;5;14m {} \033[0m, loc Y:\033[38;5;14m {} \033[0m ".format(loc_x, loc_y))
 
-        retval, drawing_img, mask, rect = cv2.floodFill(self.drawing_img, mask, seed, self.drawing_color, loDiff, upDiff)
+            mask = np.zeros((h + 2, w + 2), np.uint8)
 
-        cv2.imshow("mask", mask)
-        # cv2.imshow("drawing_img", drawing_img)
+            mask[0:3, :] = 255
+            mask[:, 0:3] = 255
+            mask[:, w-1: w + 2] = 255
+            mask[h-1:h+2, :] = 255
+
+            print(self.drawing_img.shape)
+            print(mask.shape)
+            # mask = np.full((h+2, w+2), (0, 0), dtype=np.uint8)
+
+            loDiff, upDiff = (0, 0, 0), (100, 100, 100)
+            seed = (loc_x, loc_y)
+            print(seed)
+
+
+            # retval, self.drawing_img, mask, rect = cv2.floodFill(self.drawing_img, mask, seed, self.drawing_color, loDiff, upDiff)
+            cv2.floodFill(self.drawing_img, mask, seed,
+                          (self.drawing_color[2], self.drawing_color[1], self.drawing_color[0]),
+                          loDiff, upDiff)
+
+            cv2.imshow("mask", mask)
+            # cv2.imshow("drawing_img", drawing_img)
+
+
+
+    def maskImageReverse(self):
+        image_Reverse_count = len(self.mask_image_backup)
+        image_Reverse_del_count = len(self.mask_image_del_data_backup)
+        print(image_Reverse_count)
+        if image_Reverse_count == 1:
+
+            h, w, c = self.cv_img.shape  # 이미지 사이즈 계산
+            self.mask_image_backup[0] = np.full((h, w, c), (0, 0, 0), dtype=np.uint8)  # 이미지 사이즈로 라벨 이미지 데이터 만들기 검은바탕
+
+            print("A")
+            self.drawing_img = self.mask_image_backup[0]
+            cv2.imshow("sss", self.mask_image_backup[-1])
+            self.repaint()
+
+        elif image_Reverse_count > 1:
+            print("B")
+            # self.mask_image_del_data_backup.append(copy.deepcopy(self.mask_image_backup[-1]))
+            print("----------------")
+            print(len(self.mask_image_backup))
+            print(image_Reverse_count - 1)
+            print("----------------")
+            del self.mask_image_backup[image_Reverse_count - 1]
+
+            self.drawing_img = self.mask_image_backup[image_Reverse_count - 2]
+
+            cv2.imshow("sss", self.mask_image_backup[image_Reverse_count - 2])
+            self.repaint()
+
+    def keyPressEvent(self, e):
+        if e.key() == 16777234:
+            print("←")
+            self.maskImageReverse()
+
+        elif e.key() == 16777235:
+            print("↑")
+
+        elif e.key() == 16777236:
+            print("→")
+
+        elif e.key() == 16777237:
+            print("↓")
 
     '''Reload mouse down event(Single click)'''
 
@@ -188,7 +272,6 @@ class myWindow(QWidget):
         # print("QtCore.Qt.LeftButton: \033[38;5;14m {} \033[0m".format(QtCore.Qt.LeftButton))
         # print("QtCore.Qt.RightButton: \033[38;5;14m {} \033[0m".format(QtCore.Qt.RightButton))
         # print("QtCore.Qt.MidButton: \033[38;5;14m {} \033[0m".format(QtCore.Qt.MidButton))
-
         if event.buttons() == QtCore.Qt.LeftButton:
             print("Left click")  # Response test statement
             self.lastPoint = event.pos()
@@ -199,6 +282,9 @@ class myWindow(QWidget):
 
             if self.flood_fill_btn_ck:
                 self.coordinatesFloodFill(self.lastPoint)
+
+                self.drawing_btn_ck = not self.drawing_btn_ck
+                self.flood_fill_btn_ck = not self.flood_fill_btn_ck
                 self.repaint()
 
 
@@ -265,10 +351,20 @@ class myWindow(QWidget):
         # print("event.button: \033[38;5;14m {} \033[0m".format(event.button))
         # print("Qt.LatinButton: \033[38;5;14m {} \033[0m".format(QtCore.Qt.LeftButton))
         # print("Qt.RightButton: \033[38;5;14m {} \033[0m".format(Qt.RightButton))
-        # print(QtCore.Qt.LeftButton)
-        # print(event.buttons())
-        if event.button == Qt.LeftButton:
+
+        # event.buttons() == QtCore.Qt.LeftButton
+        if event.button() == Qt.LeftButton:
             self.mouse_left_click = False
+
+            print(self.drawing_img.shape)
+            self.mask_image_backup.append(copy.deepcopy(self.drawing_img))
+
+            print(len(self.mask_image_backup))
+            try:
+                cv2.imshow("koko", self.mask_image_backup[-1])
+            except:
+                pass
+
             # print("Release the left mouse button")
         elif event.button == Qt.RightButton:
             # self.singleOffset = QPoint(0, 0)
@@ -289,8 +385,8 @@ class myWindow(QWidget):
             drawing_end_y = drawing_end_point.y() / self.scaleFactor
 
             h, w, c = self.drawing_img.shape
-            if drawing_end_x > h:
-                drawing_end_x = h
+            if drawing_end_x > w:
+                drawing_end_x = w
             elif drawing_end_x < 0:
                 drawing_end_x = 0
 
@@ -299,8 +395,8 @@ class myWindow(QWidget):
             elif drawing_end_y < 0:
                 drawing_end_y = 0
 
-            if drawing_start_x > h:
-                drawing_start_x = h
+            if drawing_start_x > w:
+                drawing_start_x = w
             elif drawing_start_x < 0:
                 drawing_start_x = 0
 
@@ -309,15 +405,21 @@ class myWindow(QWidget):
             elif drawing_start_y < 0:
                 drawing_start_y = 0
 
-            print(
-                "S X:\033[38;5;14m {} \033[0m, S Y:\033[38;5;14m {} \033[0m ".format(drawing_start_x, drawing_start_y))
-            print(
-                "E X:\033[38;5;14m {} \033[0m, E Y:\033[38;5;14m {} \033[0m ".format(drawing_end_x, drawing_end_y))
+            # 이벤트 확인용
+            # print(
+            #     "O X:\033[38;5;14m {} \033[0m".format(self.singleOffset.x()))
+            # print(
+            #     "O Y:\033[38;5;14m {} \033[0m".format(self.singleOffset.y()))
+            # print(
+            #     "S X:\033[38;5;14m {} \033[0m, S Y:\033[38;5;14m {} \033[0m ".format(drawing_start_x, drawing_start_y))
+            # print(
+            #     "E X:\033[38;5;14m {} \033[0m, E Y:\033[38;5;14m {} \033[0m ".format(drawing_end_x, drawing_end_y))
 
             cv2.line(self.drawing_img,
                      (round(drawing_start_x), round(drawing_start_y)),
                      (round(drawing_end_x), round(drawing_end_y)),
-                     self.drawing_color, self.drawing_size, cv2.LINE_AA)
+                     (self.drawing_color[2], self.drawing_color[1], self.drawing_color[0]),
+                     self.drawing_size, cv2.LINE_AA)
 
             self.lastPoint = event.pos()
             cv2.imshow("color_img", self.drawing_img)
@@ -357,7 +459,7 @@ class myWindow(QWidget):
 if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
     myshow = myWindow()
-    myshow.inputImage("2.jpg")
+    myshow.inputImage("1.jpg")
 
     myshow.changeImageTool("drawing")
     myshow.changeDrawingColor((100, 100, 0))
