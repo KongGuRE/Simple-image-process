@@ -9,19 +9,33 @@
 
 
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtWidgets import QFileDialog, QApplication, QMainWindow
+from PyQt5.QtCore import pyqtSlot
+from PyQt5.QtGui import QIcon
+from PyQt5.QtWidgets import QFileDialog, QApplication, QMainWindow, QAction, qApp, QAbstractItemView, QTableView, \
+    QStyleFactory, QTableWidgetItem
+
+from easy_file_control import *
 
 
 class Ui_MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
+        self.color_change_button_check = False
+        self.color_change_button_select_number = 0
+
         self.setupUi()
+        self.setupMenuBar()
+        self.setupColorChangeButton()
+        self.setupOtherButton()
+
+        self.setupTest()
+
         self.show()
 
     def setupUi(self):
         self.setObjectName("MainWindow")
         self.resize(807, 618)
-        self.setStyleSheet("background-color: rgb(37, 37, 38);")
+        self.setStyleSheet("background-color: rgb(37, 37, 38); color: rgb(255, 255, 255);")
         self.centralwidget = QtWidgets.QWidget(self)
         self.centralwidget.setObjectName("centralwidget")
         self.gridLayout_2 = QtWidgets.QGridLayout(self.centralwidget)
@@ -51,7 +65,8 @@ class Ui_MainWindow(QMainWindow):
         self.btn_paintbrush = QtWidgets.QPushButton(self.gridWidget)
         self.btn_paintbrush.setMinimumSize(QtCore.QSize(20, 20))
         self.btn_paintbrush.setMaximumSize(QtCore.QSize(20, 20))
-        self.btn_paintbrush.setStyleSheet("background-color:rgb(255, 255, 255) ; color:rgb(0, 0, 0);border-radius: 6 ; border : 1px solid black")
+        self.btn_paintbrush.setStyleSheet(
+            "background-color:rgb(255, 255, 255) ; color:rgb(0, 0, 0);border-radius: 6 ; border : 1px solid black")
         self.btn_paintbrush.setText("")
         icon = QtGui.QIcon()
         icon.addPixmap(QtGui.QPixmap("icon/iconmonstr-paintbrush-1-240.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
@@ -64,28 +79,44 @@ class Ui_MainWindow(QMainWindow):
         self.btn_floodfill = QtWidgets.QPushButton(self.gridWidget)
         self.btn_floodfill.setMinimumSize(QtCore.QSize(20, 20))
         self.btn_floodfill.setMaximumSize(QtCore.QSize(20, 20))
-        self.btn_floodfill.setStyleSheet("background-color:rgb(255, 255, 255) ; color:rgb(0, 0, 0);border-radius: 6 ; border : 1px solid black")
+        self.btn_floodfill.setStyleSheet(
+            "background-color:rgb(255, 255, 255) ; color:rgb(0, 0, 0);border-radius: 6 ; border : 1px solid black")
         self.btn_floodfill.setText("")
         icon1 = QtGui.QIcon()
         icon1.addPixmap(QtGui.QPixmap("icon/iconmonstr-paint-bucket-10-240.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        icon1.addPixmap(QtGui.QPixmap("icon/iconmonstr-paint-bucket-10-240 - ON.png"), QtGui.QIcon.Normal, QtGui.QIcon.On)
+        icon1.addPixmap(QtGui.QPixmap("icon/iconmonstr-paint-bucket-10-240 - ON.png"), QtGui.QIcon.Normal,
+                        QtGui.QIcon.On)
         self.btn_floodfill.setIcon(icon1)
         self.btn_floodfill.setCheckable(True)
         self.btn_floodfill.setObjectName("btn_floodfill")
         self.horizontalLayout.addWidget(self.btn_floodfill)
+        self.btn_undo = QtWidgets.QPushButton(self.gridWidget)
+        self.btn_undo.setMinimumSize(QtCore.QSize(20, 20))
+        self.btn_undo.setMaximumSize(QtCore.QSize(20, 20))
+        self.btn_undo.setStyleSheet(
+            "background-color:rgb(255, 255, 255) ; color:rgb(0, 0, 0);border-radius: 6 ; border : 1px solid black")
+        self.btn_undo.setText("")
+        icon2 = QtGui.QIcon()
+        icon2.addPixmap(QtGui.QPixmap("icon/iconmonstr-undo-2-240.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon2.addPixmap(QtGui.QPixmap("icon/iconmonstr-undo-2-240 - ON.png"), QtGui.QIcon.Normal, QtGui.QIcon.On)
+        self.btn_undo.setIcon(icon2)
+        self.btn_undo.setCheckable(False)
+        self.btn_undo.setObjectName("btn_undo")
+        self.horizontalLayout.addWidget(self.btn_undo)
+        self.btn_save = QtWidgets.QPushButton(self.gridWidget)
+        self.btn_save.setMinimumSize(QtCore.QSize(20, 20))
+        self.btn_save.setMaximumSize(QtCore.QSize(20, 20))
+        self.btn_save.setStyleSheet(
+            "background-color:rgb(255, 255, 255) ; color:rgb(0, 0, 0);border-radius: 6 ; border : 1px solid black")
+        self.btn_save.setText("")
+        icon3 = QtGui.QIcon()
+        icon3.addPixmap(QtGui.QPixmap("icon/iconmonstr-save-1-240.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.btn_save.setIcon(icon3)
+        self.btn_save.setCheckable(False)
+        self.btn_save.setObjectName("btn_save")
+        self.horizontalLayout.addWidget(self.btn_save)
         spacerItem = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
         self.horizontalLayout.addItem(spacerItem)
-        self.btn_test = QtWidgets.QPushButton(self.gridWidget)
-        self.btn_test.setMinimumSize(QtCore.QSize(50, 20))
-        self.btn_test.setMaximumSize(QtCore.QSize(50, 20))
-        self.btn_test.setStyleSheet("background-color:rgb(255, 255, 255) ; color:rgb(0, 0, 0)")
-        self.btn_test.setObjectName("btn_test")
-        self.horizontalLayout.addWidget(self.btn_test)
-        self.le_test = QtWidgets.QLineEdit(self.gridWidget)
-        self.le_test.setMaximumSize(QtCore.QSize(50, 20))
-        self.le_test.setStyleSheet("color:rgb(255, 255, 255)")
-        self.le_test.setObjectName("le_test")
-        self.horizontalLayout.addWidget(self.le_test)
         self.gridLayout.addLayout(self.horizontalLayout, 0, 0, 1, 4)
         self.horizontalGroupBox_2 = QtWidgets.QGroupBox(self.gridWidget)
         font = QtGui.QFont()
@@ -98,88 +129,118 @@ class Ui_MainWindow(QMainWindow):
         self.horizontalLayout_2.setSpacing(3)
         self.horizontalLayout_2.setObjectName("horizontalLayout_2")
         self.lab_color_print = QtWidgets.QLabel(self.horizontalGroupBox_2)
-        self.lab_color_print.setMinimumSize(QtCore.QSize(30, 30))
-        self.lab_color_print.setMaximumSize(QtCore.QSize(30, 30))
+        self.lab_color_print.setMinimumSize(QtCore.QSize(20, 20))
+        self.lab_color_print.setMaximumSize(QtCore.QSize(20, 20))
         self.lab_color_print.setText("")
         self.lab_color_print.setObjectName("lab_color_print")
         self.horizontalLayout_2.addWidget(self.lab_color_print)
+        self.lab_color_print_2 = QtWidgets.QLabel(self.horizontalGroupBox_2)
+        self.lab_color_print_2.setMinimumSize(QtCore.QSize(20, 20))
+        self.lab_color_print_2.setMaximumSize(QtCore.QSize(20, 20))
+        self.lab_color_print_2.setText("")
+        self.lab_color_print_2.setObjectName("lab_color_print_2")
+        self.horizontalLayout_2.addWidget(self.lab_color_print_2)
         self.btn_color_1 = QtWidgets.QPushButton(self.horizontalGroupBox_2)
         self.btn_color_1.setMinimumSize(QtCore.QSize(20, 20))
         self.btn_color_1.setMaximumSize(QtCore.QSize(20, 20))
-        self.btn_color_1.setStyleSheet("background-color:rgb(255, 255, 255) ; color:rgb(0, 0, 0); border-radius: 6 ; border : 0px solid black")
+        self.btn_color_1.setStyleSheet(
+            "background-color:rgb(255, 255, 255) ; color:rgb(0, 0, 0); border-radius: 6 ; border : 0px solid black")
         self.btn_color_1.setText("")
         self.btn_color_1.setObjectName("btn_color_1")
         self.horizontalLayout_2.addWidget(self.btn_color_1)
         self.btn_color_2 = QtWidgets.QPushButton(self.horizontalGroupBox_2)
         self.btn_color_2.setMinimumSize(QtCore.QSize(20, 20))
         self.btn_color_2.setMaximumSize(QtCore.QSize(20, 20))
-        self.btn_color_2.setStyleSheet("background-color:rgb(255, 255, 255) ; color:rgb(0, 0, 0); border-radius: 6 ; border : 0px solid black")
+        self.btn_color_2.setStyleSheet(
+            "background-color:rgb(255, 255, 255) ; color:rgb(0, 0, 0); border-radius: 6 ; border : 0px solid black")
         self.btn_color_2.setText("")
         self.btn_color_2.setObjectName("btn_color_2")
         self.horizontalLayout_2.addWidget(self.btn_color_2)
         self.btn_color_3 = QtWidgets.QPushButton(self.horizontalGroupBox_2)
         self.btn_color_3.setMinimumSize(QtCore.QSize(20, 20))
         self.btn_color_3.setMaximumSize(QtCore.QSize(20, 20))
-        self.btn_color_3.setStyleSheet("background-color:rgb(255, 255, 255) ; color:rgb(0, 0, 0); border-radius: 6 ; border : 0px solid black")
+        self.btn_color_3.setStyleSheet(
+            "background-color:rgb(255, 255, 255) ; color:rgb(0, 0, 0); border-radius: 6 ; border : 0px solid black")
         self.btn_color_3.setText("")
         self.btn_color_3.setObjectName("btn_color_3")
         self.horizontalLayout_2.addWidget(self.btn_color_3)
         self.btn_color_4 = QtWidgets.QPushButton(self.horizontalGroupBox_2)
         self.btn_color_4.setMinimumSize(QtCore.QSize(20, 20))
         self.btn_color_4.setMaximumSize(QtCore.QSize(20, 20))
-        self.btn_color_4.setStyleSheet("background-color:rgb(255, 255, 255) ; color:rgb(0, 0, 0); border-radius: 6 ; border : 0px solid black")
+        self.btn_color_4.setStyleSheet(
+            "background-color:rgb(255, 255, 255) ; color:rgb(0, 0, 0); border-radius: 6 ; border : 0px solid black")
         self.btn_color_4.setText("")
         self.btn_color_4.setObjectName("btn_color_4")
         self.horizontalLayout_2.addWidget(self.btn_color_4)
         self.btn_color_5 = QtWidgets.QPushButton(self.horizontalGroupBox_2)
         self.btn_color_5.setMinimumSize(QtCore.QSize(20, 20))
         self.btn_color_5.setMaximumSize(QtCore.QSize(20, 20))
-        self.btn_color_5.setStyleSheet("background-color:rgb(255, 255, 255) ; color:rgb(0, 0, 0); border-radius: 6 ; border : 0px solid black")
+        self.btn_color_5.setStyleSheet(
+            "background-color:rgb(255, 255, 255) ; color:rgb(0, 0, 0); border-radius: 6 ; border : 0px solid black")
         self.btn_color_5.setText("")
         self.btn_color_5.setObjectName("btn_color_5")
         self.horizontalLayout_2.addWidget(self.btn_color_5)
         self.btn_color_6 = QtWidgets.QPushButton(self.horizontalGroupBox_2)
         self.btn_color_6.setMinimumSize(QtCore.QSize(20, 20))
         self.btn_color_6.setMaximumSize(QtCore.QSize(20, 20))
-        self.btn_color_6.setStyleSheet("background-color:rgb(255, 255, 255) ; color:rgb(0, 0, 0); border-radius: 6 ; border : 0px solid black")
+        self.btn_color_6.setStyleSheet(
+            "background-color:rgb(255, 255, 255) ; color:rgb(0, 0, 0); border-radius: 6 ; border : 0px solid black")
         self.btn_color_6.setText("")
         self.btn_color_6.setObjectName("btn_color_6")
         self.horizontalLayout_2.addWidget(self.btn_color_6)
         self.btn_color_7 = QtWidgets.QPushButton(self.horizontalGroupBox_2)
         self.btn_color_7.setMinimumSize(QtCore.QSize(20, 20))
         self.btn_color_7.setMaximumSize(QtCore.QSize(20, 20))
-        self.btn_color_7.setStyleSheet("background-color:rgb(255, 255, 255) ; color:rgb(0, 0, 0); border-radius: 6 ; border : 0px solid black")
+        self.btn_color_7.setStyleSheet(
+            "background-color:rgb(255, 255, 255) ; color:rgb(0, 0, 0); border-radius: 6 ; border : 0px solid black")
         self.btn_color_7.setText("")
         self.btn_color_7.setObjectName("btn_color_7")
         self.horizontalLayout_2.addWidget(self.btn_color_7)
         self.btn_color_8 = QtWidgets.QPushButton(self.horizontalGroupBox_2)
         self.btn_color_8.setMinimumSize(QtCore.QSize(20, 20))
         self.btn_color_8.setMaximumSize(QtCore.QSize(20, 20))
-        self.btn_color_8.setStyleSheet("background-color:rgb(255, 255, 255) ; color:rgb(0, 0, 0); border-radius: 6 ; border : 0px solid black")
+        self.btn_color_8.setStyleSheet(
+            "background-color:rgb(255, 255, 255) ; color:rgb(0, 0, 0); border-radius: 6 ; border : 0px solid black")
         self.btn_color_8.setText("")
         self.btn_color_8.setObjectName("btn_color_8")
         self.horizontalLayout_2.addWidget(self.btn_color_8)
         self.btn_color_9 = QtWidgets.QPushButton(self.horizontalGroupBox_2)
         self.btn_color_9.setMinimumSize(QtCore.QSize(20, 20))
         self.btn_color_9.setMaximumSize(QtCore.QSize(20, 20))
-        self.btn_color_9.setStyleSheet("background-color:rgb(255, 255, 255) ; color:rgb(0, 0, 0); border-radius: 6 ; border : 0px solid black")
+        self.btn_color_9.setStyleSheet(
+            "background-color:rgb(255, 255, 255) ; color:rgb(0, 0, 0); border-radius: 6 ; border : 0px solid black")
         self.btn_color_9.setText("")
         self.btn_color_9.setObjectName("btn_color_9")
         self.horizontalLayout_2.addWidget(self.btn_color_9)
         self.btn_color_10 = QtWidgets.QPushButton(self.horizontalGroupBox_2)
         self.btn_color_10.setMinimumSize(QtCore.QSize(20, 20))
         self.btn_color_10.setMaximumSize(QtCore.QSize(20, 20))
-        self.btn_color_10.setStyleSheet("background-color:rgb(255, 255, 255) ; color:rgb(0, 0, 0); border-radius: 6 ; border : 0px solid black")
+        self.btn_color_10.setStyleSheet(
+            "background-color:rgb(255, 255, 255) ; color:rgb(0, 0, 0); border-radius: 6 ; border : 0px solid black")
         self.btn_color_10.setText("")
         self.btn_color_10.setObjectName("btn_color_10")
         self.horizontalLayout_2.addWidget(self.btn_color_10)
+        self.btn_color_palette = QtWidgets.QPushButton(self.horizontalGroupBox_2)
+        self.btn_color_palette.setMinimumSize(QtCore.QSize(20, 20))
+        self.btn_color_palette.setMaximumSize(QtCore.QSize(20, 20))
+        self.btn_color_palette.setStyleSheet(
+            "background-color:rgb(255, 255, 255) ; color:rgb(0, 0, 0);border-radius: 6 ; border : 0px solid black")
+        self.btn_color_palette.setText("")
+        icon4 = QtGui.QIcon()
+        icon4.addPixmap(QtGui.QPixmap("icon/iconmonstr-paintbrush-7-240.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon4.addPixmap(QtGui.QPixmap("icon/iconmonstr-paintbrush-7-240 - ON.png"), QtGui.QIcon.Normal, QtGui.QIcon.On)
+        self.btn_color_palette.setIcon(icon4)
+        self.btn_color_palette.setIconSize(QtCore.QSize(16, 16))
+        self.btn_color_palette.setCheckable(False)
+        self.btn_color_palette.setObjectName("btn_color_palette")
+        self.horizontalLayout_2.addWidget(self.btn_color_palette)
         spacerItem1 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
         self.horizontalLayout_2.addItem(spacerItem1)
         self.gridLayout.addWidget(self.horizontalGroupBox_2, 1, 0, 1, 6)
         self.gridLayout_2.addWidget(self.gridWidget, 0, 0, 1, 2)
         self.tableWidget = QtWidgets.QTableWidget(self.centralwidget)
-        self.tableWidget.setMaximumSize(QtCore.QSize(150, 16777215))
-        self.tableWidget.setStyleSheet("background-color: rgb(45, 45, 48);")
+        self.tableWidget.setMaximumSize(QtCore.QSize(215, 16777215))
+        self.tableWidget.setStyleSheet("")
         self.tableWidget.setObjectName("tableWidget")
         self.tableWidget.setColumnCount(0)
         self.tableWidget.setRowCount(0)
@@ -189,72 +250,313 @@ class Ui_MainWindow(QMainWindow):
         self.gridLayout_2.addWidget(self.widget, 2, 0, 1, 1)
         self.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(self)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 807, 21))
+        self.menubar.setGeometry(QtCore.QRect(0, 5, 807, 21))
         self.menubar.setObjectName("menubar")
         self.setMenuBar(self.menubar)
         self.statusbar = QtWidgets.QStatusBar(self)
         self.statusbar.setObjectName("statusbar")
         self.setStatusBar(self.statusbar)
 
-        self.retranslateUi(self)
-        self.btn_test.clicked.connect(self.btn_test_clicked)
+        self.retranslateUi()
         QtCore.QMetaObject.connectSlotsByName(self)
 
-    def retranslateUi(self, MainWindow):
+    def retranslateUi(self):
         _translate = QtCore.QCoreApplication.translate
-        MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
+        self.setWindowTitle(_translate("MainWindow", "MainWindow"))
         self.lab_pwd.setText(_translate("MainWindow", "TextLabel"))
         self.btn_dirpath.setText(_translate("MainWindow", "Path"))
-        self.btn_test.setText(_translate("MainWindow", "Test"))
-        self.le_test.setText(_translate("MainWindow", "2.jpg"))
 
-    def btn_test_clicked(self):
+    def setupColorChangeButton(self):
+        self.btn_color_1.clicked.connect(self.btn_color_1_clicked)
+        self.btn_color_2.clicked.connect(self.btn_color_2_clicked)
+        self.btn_color_3.clicked.connect(self.btn_color_3_clicked)
+        self.btn_color_4.clicked.connect(self.btn_color_4_clicked)
+        self.btn_color_5.clicked.connect(self.btn_color_5_clicked)
+        self.btn_color_6.clicked.connect(self.btn_color_6_clicked)
+        self.btn_color_7.clicked.connect(self.btn_color_7_clicked)
+        self.btn_color_8.clicked.connect(self.btn_color_8_clicked)
+        self.btn_color_9.clicked.connect(self.btn_color_9_clicked)
+        self.btn_color_10.clicked.connect(self.btn_color_10_clicked)
+
+        self.btn_color_1.setShortcut("Ctrl+1")
+        self.btn_color_2.setShortcut("Ctrl+2")
+        self.btn_color_3.setShortcut("Ctrl+3")
+        self.btn_color_4.setShortcut("Ctrl+4")
+        self.btn_color_5.setShortcut("Ctrl+5")
+        self.btn_color_6.setShortcut("Ctrl+6")
+        self.btn_color_7.setShortcut("Ctrl+7")
+        self.btn_color_8.setShortcut("Ctrl+8")
+        self.btn_color_9.setShortcut("Ctrl+9")
+        self.btn_color_10.setShortcut("Ctrl+0")
+
+        global_btn_color = (0, 0, 0)
+        global_btn_border_radius = 6
+        global_btn_border = "0px solid black"
+        self.btn_color_1_background_color = (255, 0, 0)
+        self.btn_color_2_background_color = (0, 255, 0)
+        self.btn_color_3_background_color = (0, 0, 255)
+        self.btn_color_4_background_color = (255, 255, 0)
+        self.btn_color_5_background_color = (255, 0, 255)
+        self.btn_color_6_background_color = (0, 255, 255)
+        self.btn_color_7_background_color = (150, 150, 0)
+        self.btn_color_8_background_color = (150, 0, 150)
+        self.btn_color_9_background_color = (0, 150, 150)
+        self.btn_color_10_background_color = (100, 100, 100)
+
+        self.btn_color_1.setStyleSheet("background-color: rgb{}; "
+                                       "color: rgb{}; "
+                                       "border-radius: {}; "
+                                       "border: {}px solid black ".format(self.btn_color_1_background_color,
+                                                                          global_btn_color,
+                                                                          global_btn_border_radius,
+                                                                          global_btn_border))
+        self.btn_color_2.setStyleSheet("background-color: rgb{}; "
+                                       "color: rgb{}; "
+                                       "border-radius: {}; "
+                                       "border: {}px solid black ".format(self.btn_color_2_background_color,
+                                                                          global_btn_color,
+                                                                          global_btn_border_radius,
+                                                                          global_btn_border))
+        self.btn_color_3.setStyleSheet("background-color: rgb{}; "
+                                       "color: rgb{}; "
+                                       "border-radius: {}; "
+                                       "border: {}px solid black ".format(self.btn_color_3_background_color,
+                                                                          global_btn_color,
+                                                                          global_btn_border_radius,
+                                                                          global_btn_border))
+        self.btn_color_4.setStyleSheet("background-color: rgb{}; "
+                                       "color: rgb{}; "
+                                       "border-radius: {}; "
+                                       "border: {}px solid black ".format(self.btn_color_4_background_color,
+                                                                          global_btn_color,
+                                                                          global_btn_border_radius,
+                                                                          global_btn_border))
+        self.btn_color_5.setStyleSheet("background-color: rgb{}; "
+                                       "color: rgb{}; "
+                                       "border-radius: {}; "
+                                       "border: {}px solid black ".format(self.btn_color_5_background_color,
+                                                                          global_btn_color,
+                                                                          global_btn_border_radius,
+                                                                          global_btn_border))
+        self.btn_color_6.setStyleSheet("background-color: rgb{}; "
+                                       "color: rgb{}; "
+                                       "border-radius: {}; "
+                                       "border: {}px solid black ".format(self.btn_color_6_background_color,
+                                                                          global_btn_color,
+                                                                          global_btn_border_radius,
+                                                                          global_btn_border))
+        self.btn_color_7.setStyleSheet("background-color: rgb{}; "
+                                       "color: rgb{}; "
+                                       "border-radius: {}; "
+                                       "border: {}px solid black ".format(self.btn_color_7_background_color,
+                                                                          global_btn_color,
+                                                                          global_btn_border_radius,
+                                                                          global_btn_border))
+        self.btn_color_8.setStyleSheet("background-color: rgb{}; "
+                                       "color: rgb{}; "
+                                       "border-radius: {}; "
+                                       "border: {}px solid black ".format(self.btn_color_8_background_color,
+                                                                          global_btn_color,
+                                                                          global_btn_border_radius,
+                                                                          global_btn_border))
+        self.btn_color_9.setStyleSheet("background-color: rgb{}; "
+                                       "color: rgb{}; "
+                                       "border-radius: {}; "
+                                       "border: {}px solid black ".format(self.btn_color_9_background_color,
+                                                                          global_btn_color,
+                                                                          global_btn_border_radius,
+                                                                          global_btn_border))
+        self.btn_color_10.setStyleSheet("background-color: rgb{}; "
+                                        "color: rgb{}; "
+                                        "border-radius: {}; "
+                                        "border: {}px solid black ".format(self.btn_color_10_background_color,
+                                                                           global_btn_color,
+                                                                           global_btn_border_radius,
+                                                                           global_btn_border))
+
+    def setupMenuBar(self):
+        self.setStyleSheet("background-color: rgb{};"
+                           " color: rgb{};".format((37, 37, 38), (255, 255, 255)))
+
+        # filemenu
+        exitAction = QAction(QIcon('exit.png'), 'Exit', self)
+        exitAction.setShortcut('Ctrl+Q')
+        exitAction.setStatusTip('Exit application')
+        exitAction.triggered.connect(qApp.quit)
+        dirOpenAction = QAction(QIcon('exit.png'), 'Open', self)
+        dirOpenAction.setShortcut('Ctrl+D')
+        dirOpenAction.setStatusTip('Open Image Folder')
+        dirOpenAction.triggered.connect(self.dirPathClicked)
+        saveAction = QAction(QIcon('save.png'), 'Save', self)
+        saveAction.setShortcut('Ctrl+S')
+        saveAction.setStatusTip('Save Mask Image')
+        saveAction.triggered.connect(self.btnSaveClicked)
+
+        # toolmenu
+        undoAction = QAction(QIcon('undo.png'), 'Undo', self)
+        undoAction.setShortcut('Ctrl+Z')
+        undoAction.setStatusTip('Exit application')
+        undoAction.triggered.connect(self.btuUndoClicked)
+        resetAction = QAction(QIcon('reset.png'), 'Reset', self)
+        resetAction.setShortcut('Ctrl+R')
+        resetAction.setStatusTip('Reset application')
+        resetAction.triggered.connect(self.btuResetClicked)
+
+        filemenu = self.menubar.addMenu('&File')
+        filemenu.addAction(exitAction)
+        filemenu.addAction(dirOpenAction)
+        filemenu.addAction(saveAction)
+
+        toolmenu = self.menubar.addMenu('&Tool')
+        toolmenu.addAction(undoAction)
+        toolmenu.addAction(resetAction)
+
+        self.statusBar().showMessage('Ready')
+
+    def setupOtherButton(self):
+        self.btn_save.clicked.connect(self.btnSaveClicked)
+        self.btn_undo.clicked.connect(self.btuUndoClicked)
+
+    def setupTest(self):
+        self.btn_dirpath.clicked.connect(self.dirPathClicked)
+
+    def changeLabelColorPrintBackGroundColor(self, _color):
+        self.lab_color_print.setStyleSheet("background-color: rgb{};".format(_color))
+
+    def btnTestClicked(self):
         self.widget.changeImageTool("drawing")
         self.widget.changeDrawingColor((100, 100, 0))
         self.widget.changeDrawingSize(1)
-        self.widget.inputImage(self.le_test.text())
         self.widget.imageReprint()
 
-    def btn_dirpath_clicked(self):
-        fname = QFileDialog.getExistingDirectory(self.MainWindow_M, 'Open file', './')
-        print(fname)
+    def imageFileRead(self, _file_name):
+        self.widget.changeImageTool("drawing")
+        # self.widget.changeDrawingColor((100, 100, 0))
+        self.widget.changeDrawingSize(1)
+        self.widget.inputImage(_file_name)
+        self.widget.imageReprint()
+
+    def dirPathClicked(self):
+        fname = QFileDialog.getExistingDirectory(self, 'Open file', './')
+        self.lab_pwd.setText(fname)
+        print("================")
+
+        jpg_image_files: list = search_directory(fname, ".jpg", True)
+        bmp_image_files: list = search_directory(fname, ".bmp", True)
+
+        self.image_files: list = jpg_image_files + bmp_image_files
+
+        remove_file_list = []
+
+        for __data in (self.image_files):
+            result = __data.find("python_")
+            if result != -1:
+                remove_file_list.append(__data)
+
+        for __data in remove_file_list:
+            self.image_files.remove(__data)
+
+        self.ImageFilesTable(self.image_files)
+
+    def ImageFilesTable(self, _files: list):
+        self.tableWidget.setSelectionBehavior(QTableView.SelectRows)  # multiple row 선택 가능
+        self.tableWidget.setSelectionMode(QAbstractItemView.SingleSelection)
+
+        # self.tableWidget.setEditTriggers(QAbstractItemView.AllEditTriggers)   # edit 모드
+        self.tableWidget.setEditTriggers(QAbstractItemView.NoEditTriggers)  # edit 금지 모드
+
+        # row, column 갯수 설정해야만 tablewidget 사용할수있다.
+        self.tableWidget.setColumnCount(2)
+        self.tableWidget.setRowCount(len(_files))
+
+        # column header 명 설정.
+        self.tableWidget.setHorizontalHeaderLabels(["File", "CK"])
+
+        # cell 에 data 입력하기
+        for _number, _data in enumerate(_files):
+            self.tableWidget.setItem(_number, 0, QTableWidgetItem(os.path.basename(_data)))
+            __dir, __name = os.path.split(_data)
+            check_existence_drawing_img_file = search_file(os.path.join(__dir, "python_"), __name)
+            if check_existence_drawing_img_file:
+                self.tableWidget.setItem(_number, 1, QTableWidgetItem("OK"))
+            else:
+                self.tableWidget.setItem(_number, 1, QTableWidgetItem("NO"))
+
+        self.tableWidget.cellClicked.connect(self.__mycell_clicked)
+
+    @pyqtSlot(int, int)
+    def __mycell_clicked(self, row, col):
+        cell = self.tableWidget.item(row, col)
+        self.imageFileRead(self.image_files[row])
+        self.statusBar().showMessage(self.image_files[row])
+
+    def btnSaveClicked(self):
+        print("btnSaveClicked")
+        self.widget.saveMackedFile()
+        self.ImageFilesTable(self.image_files)
+
+    def btuResetClicked(self):
+        print("btuResetClicked")
+        self.widget.resetMaskImage()
+
+    def btuUndoClicked(self):
+        self.widget.maskImageReverse()
 
     def btn_color_1_clicked(self):
-        pass
+        self.widget.changeDrawingColor(self.btn_color_1_background_color)
+        self.changeLabelColorPrintBackGroundColor(self.btn_color_1_background_color)
 
     def btn_color_2_clicked(self):
-        pass
+        self.widget.changeDrawingColor(self.btn_color_2_background_color)
+        self.changeLabelColorPrintBackGroundColor(self.btn_color_2_background_color)
 
     def btn_color_3_clicked(self):
-        pass
+        self.widget.changeDrawingColor(self.btn_color_3_background_color)
+        self.changeLabelColorPrintBackGroundColor(self.btn_color_3_background_color)
 
     def btn_color_4_clicked(self):
-        pass
+        self.widget.changeDrawingColor(self.btn_color_4_background_color)
+        self.changeLabelColorPrintBackGroundColor(self.btn_color_4_background_color)
 
     def btn_color_5_clicked(self):
-        pass
+        self.widget.changeDrawingColor(self.btn_color_5_background_color)
+        self.changeLabelColorPrintBackGroundColor(self.btn_color_5_background_color)
 
     def btn_color_6_clicked(self):
-        pass
+        self.widget.changeDrawingColor(self.btn_color_6_background_color)
+        self.changeLabelColorPrintBackGroundColor(self.btn_color_6_background_color)
 
     def btn_color_7_clicked(self):
-        pass
+        self.widget.changeDrawingColor(self.btn_color_7_background_color)
+        self.changeLabelColorPrintBackGroundColor(self.btn_color_7_background_color)
 
     def btn_color_8_clicked(self):
-        pass
+        self.widget.changeDrawingColor(self.btn_color_8_background_color)
+        self.changeLabelColorPrintBackGroundColor(self.btn_color_8_background_color)
 
     def btn_color_9_clicked(self):
-        pass
+        self.widget.changeDrawingColor(self.btn_color_9_background_color)
+        self.changeLabelColorPrintBackGroundColor(self.btn_color_9_background_color)
+
+    def btn_color_10_clicked(self):
+        self.widget.changeDrawingColor(self.btn_color_10_background_color)
+        self.changeLabelColorPrintBackGroundColor(self.btn_color_10_background_color)
 
     def mousePressEvent(self, event):
         if event.buttons() == QtCore.Qt.LeftButton:
-            print("Main Point")
+            print("LeftButton")
+
+        elif event.buttons() == QtCore.Qt.RightButton:
+            print("RightButton")
+
 
 from test3 import myWindow
 
 if __name__ == "__main__":
     import sys
+
     app = QApplication(sys.argv)
+    app.setStyle(QStyleFactory.create('Fusion'))  # --> 없으면, 헤더색 변경 안됨.
+
     ex = Ui_MainWindow()
     sys.exit(app.exec_())
-

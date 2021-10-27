@@ -197,11 +197,14 @@ if __name__ == "__main__":
     start = datetime.datetime.now()
 
     data_list = [
-        search_directory(r"E:\dataset\2호기 미분류 이미지\RT 분류\NG", "*", True),
+        search_directory(r"C:\Users\USER\OneDrive\DataSET\HTCC_Crack", "*", True),
     ]
 
+    print(len(data_list))
     data_list = list_flatten(data_list)
     random.shuffle(data_list)
+    print(len(data_list))
+    exit()
 
     number_of_Process = 1
     number_of_data = len(data_list)

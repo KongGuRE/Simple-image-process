@@ -1,13 +1,11 @@
 from typing import Type
 
-from PIL import Image
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtGui import QPixmap, QPainter
 from PyQt5.QtWidgets import QWidget
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 import sys
-from matplotlib import pyplot as plt
 
 import numpy as np
 import cv2
@@ -59,61 +57,115 @@ class myWindow(QWidget):
         self.mask_image_del_data_backup: list = []
         self.mask_image_backup_count: int = 0
 
+        self.singleOffset = QPoint(0, 0)
+
+        self.output_file_add_dir = "python_"
+
     def inputImage(self, path):
         self.scaleFactor = 1.0
         self.singleOffset = QPoint(0, 0)
+        self.path = path
+        __dir, __file = os.path.split(path)
+        check_existence_drawing_img_file = search_file(os.path.join(__dir, self.output_file_add_dir), __file)
 
         try:
-            self.cv_img = cv2.imread(path)  # opencv 이미지 불러오기
-            h, w, c = self.cv_img.shape  # 이미지 사이즈 계산
-            self.drawing_img = np.full((h, w, c), (0, 0, 0), dtype=np.uint8)  # 이미지 사이즈로 라벨 이미지 데이터 만들기 검은바탕
-            cv2.imshow("color_img", self.drawing_img)  # 라벨 이미지 확인
-            if len(self.cv_img.shape) < 3:  # 데이터 채널 확인
-                self.conv_image = cv2.cvtColor(self.cv_img, cv2.COLOR_GRAY2RGB)
+            if type(self.cv_img) == "NoneType":
+                print(type(self.cv_img))
+                pass
             else:
-                self.conv_image = cv2.cvtColor(self.cv_img, cv2.COLOR_BGR2RGB)
-            self.conv_image = cv2.addWeighted(self.conv_image, 1, self.drawing_img, 1, 0)
-            bytesPerLine = 3 * w
-            image = QImage(self.conv_image.data, w, h, bytesPerLine, QImage.Format.Format_RGB888)
+                self.cv_img = cv2.imread(path)  # opencv 이미지 불러오기
+                h, w, c = self.cv_img.shape  # 이미지 사이즈 계산
 
-            myWindow.imgPixmap = QPixmap.fromImage(image)  # Load Images
-            # myWindow.imgPixmap = QPixmap(path)  # Load Images
+                if check_existence_drawing_img_file:
+                    existence_drawing_img_file_path = os.path.join(os.path.join(__dir, self.output_file_add_dir),
+                                                                   __file)
+                    self.drawing_img = copy.deepcopy(cv2.imread(existence_drawing_img_file_path))
+                    self.drawing_img_backup = copy.deepcopy(cv2.imread(existence_drawing_img_file_path))
+                else:
+                    self.drawing_img = np.full((h, w, c), (0, 0, 0), dtype=np.uint8)  # 이미지 사이즈로 라벨 이미지 데이터 만들기 검은바탕
 
-            self.image_input_bool = True
-            myWindow.scaledImg = myWindow.imgPixmap.scaled(myWindow.imgPixmap.width(), myWindow.imgPixmap.height())
-            # Initialize zoom
+                # cv2.imshow("color_img", self.drawing_img)  # 라벨 이미지 확인
+                if len(self.cv_img.shape) < 3:  # 데이터 채널 확인
+                    self.conv_image = cv2.cvtColor(self.cv_img, cv2.COLOR_GRAY2RGB)
+                else:
+                    self.conv_image = cv2.cvtColor(self.cv_img, cv2.COLOR_BGR2RGB)
+                self.conv_image = cv2.addWeighted(self.conv_image, 1, self.drawing_img, 1, 0)
+                bytesPerLine = 3 * w
+                image = QImage(self.conv_image.data, w, h, bytesPerLine, QImage.Format.Format_RGB888)
 
-            self.singleOffset = QPoint(0, 0)  # Initialize offset value
+                myWindow.imgPixmap = QPixmap.fromImage(image)  # Load Images
+                # myWindow.imgPixmap = QPixmap(path)  # Load Images
 
-            self.mask_image_backup: list = []
-            self.mask_image_del_data_backup: list = []
-            self.mask_image_backup_count: int = 0
+                self.image_input_bool = True
+                myWindow.scaledImg = myWindow.imgPixmap.scaled(myWindow.imgPixmap.width(), myWindow.imgPixmap.height())
+                # Initialize zoom
 
-            self.mask_image_backup.append(copy.deepcopy(self.drawing_img))
-            print(len(self.mask_image_backup))
+                self.singleOffset = QPoint(0, 0)  # Initialize offset value
+
+                self.mask_image_backup: list = []
+                self.mask_image_del_data_backup: list = []
+                self.mask_image_backup_count: int = 0
+
+                self.mask_image_backup.append(copy.deepcopy(self.drawing_img))
+                print(len(self.mask_image_backup))
 
         except OSError as err:
-            print("ERROR :\033[38;5;9m {} \033[0m".format(err))
+            print("OS error:\033[38;5;9m {0}\033[0m".format(err))
+        except ValueError:
+            print("Could not convert data to an integer.")
+        except AttributeError as err:
+            print(f"AttributeError :\033[38;5;9m{err=}\033[0m, {type(err)=}")
+        except BaseException as err:
+            print(f"Unexpected :\033[38;5;9m{err=}\033[0m, {type(err)=}")
+            raise
+        # except OSError as err:
+        #     print("ERROR :\033[38;5;9m {} \033[0m".format(err))
 
     @staticmethod
     def Test_print():
         print("\033[38;5;9mok\033[0m")
-
-    def maskImageReverse(self, _data):
-        if self.mask_image_backup_count != 0:
-            pass
-        self.mask_image_backup.append(_data)
 
     def imageReprint(self):
         self.repaint()
 
     def conv(self):
         color_img = np.zeros((240, 320, 3), dtype=np.uint8)
-        cv2.imshow('color_img', color_img)
+        # cv2.imshow('color_img', color_img)
 
     def saveMackedFile(self):
-        createFolder("python_")
-        cv2.imwrite('python_/grayIronMan.jpg', self.drawing_img)
+        try:
+            __dir = os.path.dirname(self.path)
+            __dir = os.path.join(__dir, self.output_file_add_dir)
+            __file_name = os.path.basename(self.path)
+
+            print(__dir)
+            print(__file_name)
+
+            __full_file_path = os.path.join(__dir, __file_name)
+
+            print(__full_file_path)
+
+            createFolder(__dir)
+            cv2.imwrite(__full_file_path, self.drawing_img)
+
+        except OSError as err:
+            print("OS error:\033[38;5;9m {0}\033[0m".format(err))
+        except ValueError:
+            print("Could not convert data to an integer.")
+        except AttributeError as err:
+            print(f"AttributeError :\033[38;5;9m{err=}\033[0m, {type(err)=}")
+        except BaseException as err:
+            print(f"Unexpected :\033[38;5;9m{err=}\033[0m, {type(err)=}")
+            raise
+
+    def resetMaskImage(self):
+        try:
+            self.cv_img = cv2.imread(self.path)  # opencv 이미지 불러오기
+            h, w, c = self.cv_img.shape  # 이미지 사이즈 계산
+            self.drawing_img = np.full((h, w, c), (0, 0, 0), dtype=np.uint8)  # 이미지 사이즈로 라벨 이미지 데이터 만들기 검은바탕
+            self.repaint()
+        except:
+            pass
 
     def changeDrawingColor(self, _color: tuple):
         self.drawing_color = _color
@@ -141,7 +193,7 @@ class myWindow(QWidget):
     def paintEvent(self, event):
         if self.image_input_bool:
             self.displayImgPainter()
-            cv2.imshow("color_img", self.drawing_img)
+            # cv2.imshow("color_img", self.drawing_img)
 
     def displayImgPainter(self):
         # paintEvent 확인용
@@ -218,23 +270,23 @@ class myWindow(QWidget):
                           (self.drawing_color[2], self.drawing_color[1], self.drawing_color[0]),
                           loDiff, upDiff)
 
-            cv2.imshow("mask", mask)
+            # cv2.imshow("mask", mask)
             # cv2.imshow("drawing_img", drawing_img)
 
-
+        except OSError as err:
+            print("\033ERROR : {} \033[0m".format(err))
 
     def maskImageReverse(self):
         image_Reverse_count = len(self.mask_image_backup)
         image_Reverse_del_count = len(self.mask_image_del_data_backup)
         print(image_Reverse_count)
-        if image_Reverse_count == 1:
 
-            h, w, c = self.cv_img.shape  # 이미지 사이즈 계산
-            self.mask_image_backup[0] = np.full((h, w, c), (0, 0, 0), dtype=np.uint8)  # 이미지 사이즈로 라벨 이미지 데이터 만들기 검은바탕
+        if image_Reverse_count == 1:
+            # self.mask_image_backup[0] = self.drawing_img_backup
 
             print("A")
-            self.drawing_img = self.mask_image_backup[0]
-            cv2.imshow("sss", self.mask_image_backup[-1])
+            self.drawing_img = copy.deepcopy(self.drawing_img_backup)
+            # cv2.imshow("self.drawing_img_backup", self.drawing_img_backup)
             self.repaint()
 
         elif image_Reverse_count > 1:
@@ -248,13 +300,12 @@ class myWindow(QWidget):
 
             self.drawing_img = self.mask_image_backup[image_Reverse_count - 2]
 
-            cv2.imshow("sss", self.mask_image_backup[image_Reverse_count - 2])
+            # cv2.imshow("sss", self.mask_image_backup[image_Reverse_count - 2])
             self.repaint()
 
     def keyPressEvent(self, e):
         if e.key() == 16777234:
             print("←")
-            self.maskImageReverse()
 
         elif e.key() == 16777235:
             print("↑")
@@ -296,8 +347,6 @@ class myWindow(QWidget):
 
             self.drawing_btn_ck = not self.drawing_btn_ck
             self.flood_fill_btn_ck = not self.flood_fill_btn_ck
-
-            self.saveMackedFile()
 
             print(self.drawing_btn_ck)
 
@@ -360,10 +409,10 @@ class myWindow(QWidget):
             self.mask_image_backup.append(copy.deepcopy(self.drawing_img))
 
             print(len(self.mask_image_backup))
-            try:
-                cv2.imshow("koko", self.mask_image_backup[-1])
-            except:
-                pass
+            # try:
+            #     cv2.imshow("koko", self.mask_image_backup[-1])
+            # except:
+            #     pass
 
             # print("Release the left mouse button")
         elif event.button == Qt.RightButton:
@@ -422,15 +471,18 @@ class myWindow(QWidget):
                      self.drawing_size, cv2.LINE_AA)
 
             self.lastPoint = event.pos()
-            cv2.imshow("color_img", self.drawing_img)
+            # cv2.imshow("color_img", self.drawing_img)
             self.repaint()
 
         elif self.mouse_middle_click:
             print("Press the left mouse button to move the mouse")
-            myWindow.endMousePosition = event.pos() - self.preMousePosition
-            self.singleOffset = self.singleOffset + myWindow.endMousePosition
-            self.preMousePosition = event.pos()
-            self.repaint()
+            try:
+                myWindow.endMousePosition = event.pos() - self.preMousePosition
+                self.singleOffset = self.singleOffset + myWindow.endMousePosition
+                self.preMousePosition = event.pos()
+                self.repaint()
+            except OSError as err:
+                print("\033ERROR : {} \033[0m".format(err))
 
 
 #    '' reload double click event ''

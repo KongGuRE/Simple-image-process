@@ -46,6 +46,36 @@ def search_directory(_directory: str, _file_ext: str = "*", _all_sub_folders: bo
         _task_path_list = glob.glob(os.path.join(_directory, "*" + _file_ext))
     return _task_path_list
 
+def search_file(_directory: str, _file: str, _all_sub_folders: bool = False) -> bool:
+    """서브 폴더에서 까지 특정 파일 찾기 함수.
+
+    Args:
+        _directory: main directory path 설졍
+        _file: 찾을 파일 이름 확장자 포함
+        _all_sub_folders: 하위 폴더까지 검색하려면 True
+    Returns:
+        파일이 있으면 True, 없으면 False 를 반환.
+    """
+    _task_path_list = []
+    if _all_sub_folders:
+        try:
+            for (_path, _dir, _files) in os.walk(_directory):
+                for filename in _files:
+                    if filename == _file:
+                        return True
+                        # print("%s" % (os.path.join(_path, filename)))
+                    else:
+                        pass
+        except PermissionError:
+            pass
+        return False
+
+    else:
+        _task_path_list = glob.glob(os.path.join(_directory, _file))
+        if len(_task_path_list) == 0:
+            return False
+        else:
+            return True
 
 def list_flatten(lst: list):
     """2차원 list를 1치원으로 변경하는 함수.
@@ -75,6 +105,7 @@ def list_chunk(lst, n):
     """
     return [lst[i:i + n] for i in range(0, len(lst), n)]
 
+
 def del_ex(_file_rm_data_name: list) -> List[str]:
     """파일 list 삭제 함수.
 
@@ -98,3 +129,6 @@ def del_ex(_file_rm_data_name: list) -> List[str]:
         pass
 
     return failed_file_list
+
+# if __name__ == '__main__':
+#     print(search_file(r"C:\ProgrammingFiles\Python\Simple_image_process\python_", "1.jpg", False))
