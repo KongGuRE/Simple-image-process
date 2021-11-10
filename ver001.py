@@ -367,7 +367,7 @@ class Ui_MainWindow(QMainWindow):
         exitAction.setStatusTip('Exit application')
         exitAction.triggered.connect(qApp.quit)
         dirOpenAction = QAction(QIcon(r'icon\open.png'), 'Open', self)
-        dirOpenAction.setShortcut('Ctrl+D')
+        dirOpenAction.setShortcut('Ctrl+O')
         dirOpenAction.setStatusTip('Open Image Folder')
         dirOpenAction.triggered.connect(self.dirPathClicked)
         saveAction = QAction(QIcon(r'icon\save.png'), 'Save', self)
