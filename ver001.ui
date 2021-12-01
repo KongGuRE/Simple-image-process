@@ -129,6 +129,9 @@
           </widget>
          </item>
          <item>
+          <widget class="QSpinBox" name="spbox_paintbrus_size"/>
+         </item>
+         <item>
           <widget class="QPushButton" name="btn_floodfill">
            <property name="minimumSize">
             <size>

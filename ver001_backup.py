@@ -57,7 +57,8 @@ class Ui_MainWindow(QMainWindow):
         self.btn_dirpath = QtWidgets.QPushButton(self.gridWidget)
         self.btn_dirpath.setMinimumSize(QtCore.QSize(50, 10))
         self.btn_dirpath.setMaximumSize(QtCore.QSize(50, 25))
-        self.btn_dirpath.setStyleSheet("background-color:rgb(255, 255, 255); color:rgb(0, 0, 0)")
+        self.btn_dirpath.setStyleSheet("background-color:rgb(45, 45, 48); border-radius: 6")
+        self.btn_dirpath.setIcon(QIcon(r'icon\open.png'))
         self.btn_dirpath.setObjectName("btn_dirpath")
         self.gridLayout.addWidget(self.btn_dirpath, 0, 4, 1, 1)
         self.horizontalLayout = QtWidgets.QHBoxLayout()
@@ -264,7 +265,6 @@ class Ui_MainWindow(QMainWindow):
         _translate = QtCore.QCoreApplication.translate
         self.setWindowTitle(_translate("MainWindow", "MainWindow"))
         self.lab_pwd.setText(_translate("MainWindow", "TextLabel"))
-        self.btn_dirpath.setText(_translate("MainWindow", "Path"))
 
     def setupColorChangeButton(self):
         self.btn_color_1.clicked.connect(self.btn_color_1_clicked)
@@ -379,29 +379,38 @@ class Ui_MainWindow(QMainWindow):
                            " color: rgb{};".format((37, 37, 38), (255, 255, 255)))
 
         # filemenu
-        exitAction = QAction(QIcon('exit.png'), 'Exit', self)
+        exitAction = QAction(QIcon(r'icon\exit.png'), 'Exit', self)
         exitAction.setShortcut('Ctrl+Q')
         exitAction.setStatusTip('Exit application')
         exitAction.triggered.connect(qApp.quit)
-        dirOpenAction = QAction(QIcon('exit.png'), 'Open', self)
-        dirOpenAction.setShortcut('Ctrl+D')
+        dirOpenAction = QAction(QIcon(r'icon\open.png'), 'Open', self)
+        dirOpenAction.setShortcut('Ctrl+O')
         dirOpenAction.setStatusTip('Open Image Folder')
         dirOpenAction.triggered.connect(self.dirPathClicked)
-        saveAction = QAction(QIcon('save.png'), 'Save', self)
+        saveAction = QAction(QIcon(r'icon\save.png'), 'Save', self)
         saveAction.setShortcut('Ctrl+S')
         saveAction.setStatusTip('Save Mask Image')
         saveAction.triggered.connect(self.btnSaveClicked)
 
         # toolmenu
-        undoAction = QAction(QIcon('undo.png'), 'Undo', self)
+        undoAction = QAction(QIcon(r'icon\undo.png'), 'Undo', self)
         undoAction.setShortcut('Ctrl+Z')
         undoAction.setStatusTip('Exit application')
         undoAction.triggered.connect(self.btuUndoClicked)
-        resetAction = QAction(QIcon('reset.png'), 'Reset', self)
+        resetAction = QAction(QIcon(r'icon\reset.png'), 'Reset', self)
         resetAction.setShortcut('Ctrl+R')
         resetAction.setStatusTip('Reset application')
         resetAction.triggered.connect(self.btuResetClicked)
+        drawingAction = QAction(QIcon(r'icon\drawing.png'), 'Drawing', self)
+        drawingAction.setShortcut('Ctrl+D')
+        drawingAction.setStatusTip('point Drawing')
+        drawingAction.triggered.connect(self.btuDrawingClicked)
+        floodfillAction = QAction(QIcon(r'icon\flood fill.png'), 'Flood fill', self)
+        floodfillAction.setShortcut('Ctrl+F')
+        floodfillAction.setStatusTip('Flood fill')
+        floodfillAction.triggered.connect(self.btuFloodfillClicked)
 
+        # menubar
         filemenu = self.menubar.addMenu('&File')
         filemenu.addAction(exitAction)
         filemenu.addAction(dirOpenAction)
@@ -410,6 +419,8 @@ class Ui_MainWindow(QMainWindow):
         toolmenu = self.menubar.addMenu('&Tool')
         toolmenu.addAction(undoAction)
         toolmenu.addAction(resetAction)
+        toolmenu.addAction(drawingAction)
+        toolmenu.addAction(floodfillAction)
 
         self.statusBar().showMessage('Ready')
 
@@ -501,6 +512,12 @@ class Ui_MainWindow(QMainWindow):
 
     def btuUndoClicked(self):
         self.widget.maskImageReverse()
+
+    def btuDrawingClicked(self):
+        self.widget.changeImageTool("drawing")
+
+    def btuFloodfillClicked(self):
+        self.widget.changeImageTool("flood fill")
 
     def btn_color_1_clicked(self):
         self.widget.changeDrawingColor(self.btn_color_1_background_color)
